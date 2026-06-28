@@ -6,12 +6,12 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Shopee AI Listing Assistant',
-  description: 'AI-powered product listing generator for Shopee sellers',
+  description: 'Jana listing produk Shopee secara automatik dengan AI',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="ms">
       <body className={inter.className}>{children}</body>
     </html>
   )

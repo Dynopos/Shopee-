@@ -9,10 +9,12 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        shopee: {
-          orange: '#EE4D2D',
-          'orange-dark': '#D73211',
-          'orange-light': '#FF6633',
+        brand: {
+          red: '#9B1C1C',
+          'red-dark': '#7F1D1D',
+          'red-bright': '#DC2626',
+          blue: '#2563EB',
+          'blue-dark': '#1D4ED8',
         },
       },
     },

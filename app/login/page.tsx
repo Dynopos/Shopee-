@@ -23,7 +23,7 @@ export default function LoginPage() {
     if (isSignUp) {
       const { error } = await supabase.auth.signUp({ email, password })
       if (error) setError(error.message)
-      else setMessage('Check your email to confirm your account.')
+      else setMessage('Semak emel anda untuk mengesahkan akaun.')
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) setError(error.message)
@@ -34,74 +34,83 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md">
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{ background: 'linear-gradient(135deg,#7F1D1D 0%,#1E3A5F 100%)' }}
+    >
+      <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-[#EE4D2D] text-white text-2xl font-bold mb-4">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/20 text-white text-2xl font-bold mb-4">
             S
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Shopee AI Listing</h1>
-          <p className="text-gray-500 mt-1">AI-powered product listing assistant</p>
+          <h1 className="text-2xl font-bold text-white">Shopee AI Listing</h1>
+          <p className="text-white/60 mt-1 text-sm">Jana listing produk dengan kuasa AI</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-          <h2 className="text-xl font-semibold mb-6">{isSignUp ? 'Create account' : 'Sign in'}</h2>
+        <div className="bg-white rounded-2xl shadow-xl p-7">
+          <h2 className="text-lg font-bold text-gray-900 mb-5">
+            {isSignUp ? 'Daftar Akaun' : 'Log Masuk'}
+          </h2>
 
           {error && (
-            <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm">
+            <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm">
               {error}
             </div>
           )}
           {message && (
-            <div className="mb-4 p-3 rounded-lg bg-green-50 border border-green-100 text-green-700 text-sm">
+            <div className="mb-4 p-3 rounded-xl bg-green-50 border border-green-100 text-green-700 text-sm">
               {message}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+                Emel
+              </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                placeholder="you@example.com"
+                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="anda@contoh.com"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+                Kata Laluan
+              </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="••••••••"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 px-4 bg-[#EE4D2D] hover:bg-[#D73211] text-white font-medium rounded-lg transition-colors disabled:opacity-60"
+              className="w-full py-3 px-4 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold rounded-xl transition-colors disabled:opacity-60 text-sm"
             >
-              {loading ? 'Please wait…' : isSignUp ? 'Create account' : 'Sign in'}
+              {loading ? 'Sila tunggu…' : isSignUp ? 'Daftar Akaun' : 'Log Masuk'}
             </button>
           </form>
 
-          <p className="mt-4 text-center text-sm text-gray-500">
-            {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+          <p className="mt-5 text-center text-sm text-gray-400">
+            {isSignUp ? 'Sudah ada akaun?' : 'Belum ada akaun?'}{' '}
             <button
               onClick={() => {
                 setIsSignUp(!isSignUp)
                 setError(null)
                 setMessage(null)
               }}
-              className="text-[#EE4D2D] hover:underline font-medium"
+              className="text-[#DC2626] hover:underline font-semibold"
             >
-              {isSignUp ? 'Sign in' : 'Sign up'}
+              {isSignUp ? 'Log Masuk' : 'Daftar'}
             </button>
           </p>
         </div>

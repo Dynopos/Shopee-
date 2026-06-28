@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useDropzone } from 'react-dropzone'
-import Navbar from '@/components/layout/Navbar'
+import AppShell from '@/components/layout/AppShell'
 import { cn } from '@/lib/utils'
 
 export default function UploadPage() {
@@ -27,7 +27,7 @@ export default function UploadPage() {
     maxFiles: 1,
     maxSize: 10 * 1024 * 1024,
     onDropRejected: (rejected) => {
-      const reason = rejected[0]?.errors[0]?.message ?? 'Invalid file'
+      const reason = rejected[0]?.errors[0]?.message ?? 'Fail tidak sah'
       setError(reason)
     },
   })
@@ -44,7 +44,7 @@ export default function UploadPage() {
       const res = await fetch('/api/ai/generate', { method: 'POST', body: form })
       const data = await res.json()
 
-      if (!res.ok) throw new Error(data.error || 'Generation failed')
+      if (!res.ok) throw new Error(data.error || 'Penjanaan gagal')
 
       sessionStorage.setItem(
         'listing_draft',
@@ -54,26 +54,25 @@ export default function UploadPage() {
 
       router.push('/preview')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong')
+      setError(err instanceof Error ? err.message : 'Ralat berlaku')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <>
-      <Navbar />
-      <main className="max-w-xl mx-auto px-4 py-12">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Upload Product Image</h1>
-        <p className="text-gray-500 mb-8">
-          Upload a clear photo and AI will generate the full listing for you.
-        </p>
+    <AppShell>
+      <div className="bg-white border-b border-gray-100 px-8 py-4 sticky top-0 z-10">
+        <h1 className="text-lg font-bold text-gray-900">Muat Naik Gambar Produk</h1>
+        <p className="text-xs text-gray-400">Muat naik gambar produk, AI akan jana listing lengkap</p>
+      </div>
 
+      <div className="p-8 max-w-xl">
         <div
           {...getRootProps()}
           className={cn(
             'border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-colors',
-            isDragActive && 'border-[#EE4D2D] bg-orange-50',
+            isDragActive && 'border-[#2563EB] bg-blue-50',
             !isDragActive && !file && 'border-gray-200 hover:border-gray-300 bg-white',
             file && 'border-green-300 bg-green-50'
           )}
@@ -83,37 +82,27 @@ export default function UploadPage() {
             <div className="space-y-3">
               <img
                 src={preview}
-                alt="Preview"
-                className="max-h-60 mx-auto rounded-lg object-contain"
+                alt="Pratonton"
+                className="max-h-60 mx-auto rounded-xl object-contain"
               />
               <p className="text-sm text-gray-500">
                 {file?.name} &middot; {((file?.size ?? 0) / 1024).toFixed(0)} KB
               </p>
-              <p className="text-xs text-gray-400">Click or drag to replace</p>
+              <p className="text-xs text-gray-400">Klik atau seret untuk ganti</p>
             </div>
           ) : (
             <div>
-              <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-gray-50 flex items-center justify-center">
-                <svg
-                  className="w-7 h-7 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
+              <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-blue-50 flex items-center justify-center">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth={1.5} className="w-7 h-7">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
               </div>
               {isDragActive ? (
-                <p className="text-[#EE4D2D] font-medium">Drop image here</p>
+                <p className="text-[#2563EB] font-semibold">Lepaskan gambar di sini</p>
               ) : (
                 <>
-                  <p className="font-medium text-gray-700">Drag & drop or click to upload</p>
-                  <p className="text-sm text-gray-400 mt-1">JPG, PNG, WebP — max 10 MB</p>
+                  <p className="font-semibold text-gray-700">Seret & lepas atau klik untuk muat naik</p>
+                  <p className="text-sm text-gray-400 mt-1">JPG, PNG, WebP — maks 10 MB</p>
                 </>
               )}
             </div>
@@ -121,7 +110,7 @@ export default function UploadPage() {
         </div>
 
         {error && (
-          <div className="mt-4 p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm">
+          <div className="mt-4 p-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm">
             {error}
           </div>
         )}
@@ -129,19 +118,24 @@ export default function UploadPage() {
         <button
           onClick={handleGenerate}
           disabled={!file || loading}
-          className="mt-6 w-full py-3 bg-[#EE4D2D] hover:bg-[#D73211] disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
+          className="mt-6 w-full py-3 bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
         >
           {loading ? (
             <>
               <Spinner />
-              AI is analyzing your image…
+              AI sedang menganalisis gambar anda…
             </>
           ) : (
-            'Generate AI Listing'
+            <>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+              </svg>
+              Jana Listing AI
+            </>
           )}
         </button>
-      </main>
-    </>
+      </div>
+    </AppShell>
   )
 }
 
