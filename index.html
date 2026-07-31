@@ -289,6 +289,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 .badge-tiktok{background:var(--border-light);color:var(--text)}
 .badge-ok{background:var(--green-bg);color:var(--green)}
 .badge-warn{background:var(--orange-bg);color:var(--orange)}
+.badge-bad{background:color-mix(in srgb,var(--red) 14%,transparent);color:var(--red)}
+input[type=file]{background:var(--bg);border:1px dashed var(--border);border-radius:var(--radius-sm);color:var(--text-3);font-size:12px;font-family:inherit;padding:8px 11px;width:100%;cursor:pointer}
+input[type=file]::file-selector-button{background:var(--grad);color:#fff;border:none;border-radius:6px;padding:5px 11px;font-size:11px;font-weight:600;margin-right:9px;cursor:pointer;font-family:inherit}
 
 /* ─── SEARCH ─── */
 .search-wrap{position:relative}
@@ -509,6 +512,8 @@ const S = {
   search: '',
   adminTab: 'shopee',
   feeDb: JSON.parse(JSON.stringify(FEE_DB)),
+  rev: {cost:'', margin:30, ads:5, platform:'shopee', category:'Health & Beauty'},
+  audit: {rows:[], target:20, fileName:'', truncated:false},
   aiAdvice: null,
   aiLoading: false,
   nextId: 100,
@@ -519,6 +524,8 @@ const NAV = [
   {section:'UTAMA',items:[{key:'dashboard',icon:'◈',label:'Overview'}]},
   {section:'APPS',items:[
     {key:'calculator',icon:'🧮',label:'Kalkulator'},
+    {key:'reverse',icon:'⇄',label:'Reverse Pricing'},
+    {key:'audit',icon:'📋',label:'Audit Pukal (CSV)'},
     {key:'saved',icon:'📦',label:'Produk Tersimpan'},
     {key:'monitor',icon:'📡',label:'Pemantau Fee'},
   ]},
@@ -529,7 +536,7 @@ const NAV = [
   ]},
 ];
 
-const PAGE_TITLE = {dashboard:'Overview',calculator:'Kalkulator Untung',saved:'Produk Tersimpan',monitor:'Pemantau Fee',admin:'Enjin Fee'};
+const PAGE_TITLE = {dashboard:'Overview',calculator:'Kalkulator Untung',reverse:'Reverse Pricing',audit:'Audit Pukal Produk',saved:'Produk Tersimpan',monitor:'Pemantau Fee',admin:'Enjin Fee'};
 
 // ─── RENDER NAV ─────────────────────────────────────────────
 function renderNav() {
@@ -550,8 +557,9 @@ function renderNav() {
   const BN = [
     {key:'dashboard', icon:'◈',  label:'Utama'},
     {key:'calculator',icon:'🧮', label:'Kira'},
+    {key:'reverse',   icon:'⇄',  label:'Songsang'},
+    {key:'audit',     icon:'📋', label:'Audit'},
     {key:'saved',     icon:'📦', label:'Produk'},
-    {key:'monitor',   icon:'📡', label:'Fee'},
     {key:'admin',     icon:'⚙',  label:'Admin'},
   ];
   document.getElementById('bottom-nav').innerHTML = BN.map(b=>`
@@ -989,6 +997,359 @@ function viewAdmin() {
   </div>`;
 }
 
+// ─── REVERSE PRICING ────────────────────────────────────────
+function reverseCalc(cost, marginPct, adsPct, rule) {
+  const flat = +rule.flat||0;
+  const denom = 1 - (rule.c+rule.t+rule.p)/100 - adsPct/100 - marginPct/100;
+  if (denom <= 0.01) return {ok:false};
+  const price = (cost + flat) / denom;
+  const fees = price*(rule.c+rule.t+rule.p)/100 + flat;
+  const ads = price*adsPct/100;
+  const profit = price - fees - ads - cost;
+  return {ok:true, price, fees, ads, profit, margin:price?profit/price*100:0, payout:price-fees};
+}
+
+function revRule() {
+  const db = S.feeDb||FEE_DB;
+  return db[S.rev.platform]?.categories?.[S.rev.category] || {c:10.26,t:3.78,p:5.94,flat:0.54};
+}
+
+function revOutHTML() {
+  const R = S.rev, rule = revRule();
+  const cost = +R.cost||0;
+  if (!cost) return `<div class="card"><div class="empty"><div class="empty-icon">⇄</div><div class="empty-title">Masukkan kos untuk mula</div><div class="empty-sub">Harga jual yang betul akan dikira secara langsung</div></div></div>`;
+  const res = reverseCalc(cost, +R.margin||0, +R.ads||0, rule);
+  if (!res.ok) return `<div class="alert warn">⚠️ <div><b>Sasaran tidak mungkin.</b> Margin ${R.margin}% + fee ${(rule.c+rule.t+rule.p).toFixed(2)}% + iklan ${R.ads}% melebihi 99% harga jual. Turunkan margin sasaran atau iklan.</div></div>`;
+  return `
+  <div class="sim-display">
+    <div class="sim-note">Harga Jual Cadangan</div>
+    <div class="sim-price">${rm(res.price)}</div>
+    <div class="sim-note">margin bersih ${pct(res.margin)} terjamin</div>
+  </div>
+  <div class="card">
+    <div class="card-head"><div class="card-title"><span class="card-icon">🧾</span>Semakan Songsang</div>
+      <button class="btn btn-primary btn-sm" onclick="useRevPrice()">Guna dalam Kalkulator →</button></div>
+    <div class="fee-box">
+      <div class="fee-row"><span class="fee-key">Harga jual</span><span class="fee-val">${rm(res.price)}</span></div>
+      <div class="fee-row"><span class="fee-key">(−) Fee marketplace ${(rule.c+rule.t+rule.p).toFixed(2)}% + RM${(+rule.flat||0).toFixed(2)}</span><span class="fee-val">−${rm(res.fees)}</span></div>
+      <div class="fee-row"><span class="fee-key">(−) Iklan / marketing ${+R.ads||0}%</span><span class="fee-val">−${rm(res.ads)}</span></div>
+      <div class="fee-row"><span class="fee-key">(−) Jumlah kos produk</span><span class="fee-val">−${rm(cost)}</span></div>
+      <div class="fee-total-row"><span class="fee-total-key">Untung bersih seunit</span><span class="fee-total-val">${rm(res.profit)}</span></div>
+    </div>
+  </div>`;
+}
+
+window.revInput = (k,v) => { S.rev[k]=v; const el=document.getElementById('rev-out'); if(el) el.innerHTML=revOutHTML(); };
+window.useRevPrice = () => {
+  const res = reverseCalc(+S.rev.cost||0, +S.rev.margin||0, +S.rev.ads||0, revRule());
+  if (!res.ok) return;
+  S.platform=S.rev.platform; S.category=S.rev.category; S.price=Math.round(res.price*100)/100;
+  go('calculator');
+};
+
+function viewReverse() {
+  const R = S.rev, rule = revRule();
+  const cats = Object.keys((S.feeDb||FEE_DB)[R.platform].categories);
+  return `
+  <div class="card">
+    <div class="card-head"><div>
+      <div class="card-title"><span class="card-icon">⇄</span>Reverse Pricing</div>
+      <div class="card-sub">Tetapkan margin yang anda mahu — sistem kira harga jual yang betul</div>
+    </div></div>
+    <div class="grid2" style="margin-bottom:12px">
+      <div class="fg"><label>Jumlah Kos Keseluruhan (RM)</label>
+        <input class="mono" type="number" min="0" step="0.01" placeholder="cth. 15.50" value="${e(R.cost)}" oninput="revInput('cost',this.value)"/></div>
+      <div class="fg"><label>Margin Sasaran (%)</label>
+        <input class="mono" type="number" min="0" max="90" step="1" value="${e(R.margin)}" oninput="revInput('margin',this.value)"/></div>
+      <div class="fg"><label>Platform</label>
+        <select onchange="S.rev.platform=this.value;S.rev.category=Object.keys((S.feeDb||FEE_DB)[this.value].categories)[0];render()">
+          <option value="shopee" ${R.platform==='shopee'?'selected':''}>🛍️ Shopee Malaysia</option>
+          <option value="tiktok" ${R.platform==='tiktok'?'selected':''}>🎵 TikTok Shop Malaysia</option>
+        </select></div>
+      <div class="fg"><label>Kategori</label>
+        <select onchange="S.rev.category=this.value;render()">
+          ${cats.map(c=>`<option ${R.category===c?'selected':''}>${c}</option>`).join('')}
+        </select></div>
+      <div class="fg"><label>Iklan / Marketing (% harga jual)</label>
+        <input class="mono" type="number" min="0" max="50" step="0.5" value="${e(R.ads)}" oninput="revInput('ads',this.value)"/></div>
+      <div class="fg"><label>Fee Marketplace (auto)</label>
+        <input class="mono" type="text" disabled value="${(rule.c+rule.t+rule.p).toFixed(2)}% + RM${(+rule.flat||0).toFixed(2)}/pesanan"/></div>
+    </div>
+  </div>
+  <div id="rev-out">${revOutHTML()}</div>`;
+}
+
+// ─── AUDIT PUKAL (CSV) ──────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.replace(/\r/g,'').split('\n').filter(l=>l.trim());
+  return lines.map(l=>{
+    const out=[]; let cur='', q=false;
+    for (const ch of l) {
+      if (ch==='"') { q=!q; continue; }
+      if ((ch===','||ch===';') && !q) { out.push(cur); cur=''; continue; }
+      cur+=ch;
+    }
+    out.push(cur);
+    return out.map(s=>s.trim());
+  });
+}
+
+function loadAuditCSV(text, name) {
+  const rows = parseCSV(text);
+  if (!rows.length) { alert('Fail CSV kosong.'); return; }
+  let start=0, map={nama:0,kos:1,harga:2,platform:3,kategori:4,iklan:5};
+  const h = rows[0].map(x=>x.toLowerCase());
+  if (h.some(x=>/nama|name|produk|product|kos|cost|modal|harga|price/.test(x))) {
+    start=1;
+    const idx=(...keys)=>h.findIndex(x=>keys.some(k=>x.includes(k)));
+    map={nama:idx('nama','name','produk','product'),kos:idx('kos','cost','modal'),harga:idx('harga','price'),
+         platform:idx('platform'),kategori:idx('kategori','category'),iklan:idx('iklan','ads','marketing')};
+  }
+  const data = rows.slice(start);
+  S.audit.truncated = data.length>100;
+  S.audit.fileName = name;
+  S.audit.rows = data.slice(0,100).map((r,i)=>{
+    const g=k=>map[k]>=0?(r[map[k]]||''):'';
+    const num=v=>parseFloat(String(v).replace(/[^0-9.\-]/g,''))||0;
+    const platform=(g('platform')||'shopee').toLowerCase().includes('tik')?'tiktok':'shopee';
+    const cats=Object.keys(FEE_DB[platform].categories);
+    const raw=g('kategori').toLowerCase().trim();
+    const category=cats.find(c=>c.toLowerCase()===raw)||cats.find(c=>raw&&c.toLowerCase().includes(raw))||'Health & Beauty';
+    return {name:g('nama')||('Produk '+(i+1)), cost:num(g('kos')), price:num(g('harga')), platform, category, ads:num(g('iklan'))};
+  });
+  render();
+}
+
+function auditCalc(p) {
+  const db = S.feeDb||FEE_DB;
+  const rule = db[p.platform]?.categories?.[p.category] || {c:10.26,t:3.78,p:5.94,flat:0.54};
+  const fees = p.price*(rule.c+rule.t+rule.p)/100 + (+rule.flat||0);
+  const ads = p.price*p.ads/100;
+  const profit = p.price - fees - ads - p.cost;
+  const margin = p.price ? profit/p.price*100 : 0;
+  const sug = reverseCalc(p.cost, S.audit.target, p.ads, rule);
+  const status = profit<0 ? 'rugi' : (margin<10 ? 'bahaya' : 'sihat');
+  return {fees, ads, profit, margin, sug, status, rule};
+}
+
+const AUDIT_BADGE = {rugi:'<span class="badge badge-bad">🔴 RUGI</span>', bahaya:'<span class="badge badge-warn">🟠 BAHAYA</span>', sihat:'<span class="badge badge-ok">🟢 SIHAT</span>'};
+
+window.auditFile = input => {
+  const f = input.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => loadAuditCSV(String(r.result), f.name);
+  r.readAsText(f);
+  input.value='';
+};
+
+window.auditTemplate = () => {
+  const csv = 'nama,kos,harga,platform,kategori,iklan\nSkincare Set Premium,15.50,35.90,shopee,Health & Beauty,5\nTudung Bawal Cotton,18.00,40.00,tiktok,Fashion,10\nAir Fryer Mini 2L,95.00,149.90,shopee,Electronics,0\n';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(["﻿"+csv],{type:'text/csv;charset=utf-8'}));
+  a.download = 'template-audit.csv'; a.click(); URL.revokeObjectURL(a.href);
+};
+
+window.auditDemo = () => {
+  const demo = [
+    ['Skincare Set Premium',15.5,35.9,'shopee','Health & Beauty',5],
+    ['Tudung Bawal Cotton',18,40,'tiktok','Fashion',10],
+    ['Air Fryer Mini 2L',95,149.9,'shopee','Electronics',0],
+    ['Serum Vitamin C',22,29.9,'shopee','Health & Beauty',8],
+    ['Kemeja Batik Lelaki',35,49,'tiktok','Fashion',12],
+    ['Powerbank 20000mAh',42,55,'shopee','Electronics',5],
+    ['Set Sudu Garpu Premium',12,38,'shopee','Home & Living',3],
+    ['Kopi Prebiotik 3-in-1',14,25,'tiktok','Food & Beverages',15],
+    ['Bantal Memory Foam',28,33,'shopee','Home & Living',6],
+    ['Lipmatte Longlasting',8,19.9,'tiktok','Health & Beauty',10],
+    ['Tumbler 900ml Viral',16,21,'shopee','Home & Living',8],
+    ['Sambal Garing Homemade',9,15.9,'shopee','Food & Beverages',4],
+  ];
+  S.audit.rows = demo.map(d=>({name:d[0],cost:d[1],price:d[2],platform:d[3],category:d[4],ads:d[5]}));
+  S.audit.fileName = 'data-demo.csv';
+  S.audit.truncated = false;
+  render();
+};
+
+function viewAudit() {
+  const A = S.audit;
+  const head = `
+  <div class="card">
+    <div class="card-head"><div>
+      <div class="card-title"><span class="card-icon">📋</span>Audit Pukal Produk</div>
+      <div class="card-sub">Upload CSV sehingga 100 produk — semak untung setiap satu sekali gus</div>
+    </div></div>
+    <div class="grid2" style="margin-bottom:11px">
+      <div class="fg"><label>Fail CSV</label><input type="file" accept=".csv,text/csv" onchange="auditFile(this)"/></div>
+      <div class="fg"><label>Margin Sasaran untuk Harga Cadangan (%)</label>
+        <input class="mono" type="number" min="1" max="80" value="${A.target}" onchange="S.audit.target=Math.max(1,+this.value||20);render()"/></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button class="btn btn-outline btn-sm" onclick="auditTemplate()">⬇ Download Template CSV</button>
+      <button class="btn btn-outline btn-sm" onclick="auditDemo()">✨ Cuba Data Demo</button>
+      ${A.fileName?`<span style="font-size:11px;color:var(--text-3)">📄 ${e(A.fileName)} — ${A.rows.length} produk dimuat</span>`:''}
+    </div>
+    <div style="font-size:10px;color:var(--text-4);margin-top:9px;line-height:1.6">Kolum: <b>nama, kos, harga, platform</b> (shopee/tiktok)<b>, kategori, iklan</b> (%). Baris pertama boleh jadi tajuk. Kategori tak dikenali akan guna Health &amp; Beauty.</div>
+  </div>`;
+
+  if (!A.rows.length) return head + `<div class="card"><div class="empty"><div class="empty-icon">📋</div><div class="empty-title">Tiada data lagi</div><div class="empty-sub">Upload CSV anda atau cuba data demo untuk lihat cara ia berfungsi</div></div></div>`;
+
+  const calcs = A.rows.map(auditCalc);
+  const n = {rugi:0, bahaya:0, sihat:0};
+  calcs.forEach(c=>n[c.status]++);
+  const totProfit = calcs.reduce((s,c)=>s+c.profit,0);
+
+  return head + `
+  ${A.truncated?`<div class="alert warn">⚠️ Fail melebihi 100 baris — hanya 100 produk pertama diproses.</div>`:''}
+  <div class="stats-row">
+    <div class="stat"><div class="stat-label">Jumlah Produk</div><div class="stat-val">${A.rows.length}</div><div class="stat-note">Untung agregat: ${rm(totProfit)}/unit</div></div>
+    <div class="stat"><div class="stat-label">🔴 Rugi</div><div class="stat-val red" style="color:var(--red)">${n.rugi}</div><div class="stat-note">Perlu tindakan segera</div></div>
+    <div class="stat"><div class="stat-label">🟠 Bahaya</div><div class="stat-val" style="background:none;color:var(--orange)">${n.bahaya}</div><div class="stat-note">Margin bawah 10%</div></div>
+    <div class="stat"><div class="stat-label">🟢 Sihat</div><div class="stat-val green">${n.sihat}</div><div class="stat-note">Margin 10% ke atas</div></div>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div><div class="card-title"><span class="card-icon">📄</span>Keputusan Audit</div>
+      <div class="card-sub">Harga cadangan dikira untuk margin ${A.target}%</div></div>
+      <button class="btn btn-primary btn-sm" onclick="auditPDFAll()">📄 Report Premium (PDF)</button>
+    </div>
+    <div class="tbl-scroll"><table class="tbl">
+      <thead><tr><th>#</th><th>Produk</th><th>Kos</th><th>Harga</th><th>Untung</th><th>Margin</th><th>Status</th><th>Cadangan</th><th></th></tr></thead>
+      <tbody>
+        ${A.rows.map((p,i)=>{ const c=calcs[i]; return `
+          <tr>
+            <td style="color:var(--text-4)">${i+1}</td>
+            <td><div style="font-weight:700;color:var(--text)">${e(p.name)}</div><div style="font-size:10px;color:var(--text-4)">${p.platform==='shopee'?'🛍️ Shopee':'🎵 TikTok'} · ${e(p.category)}${p.ads?` · iklan ${p.ads}%`:''}</div></td>
+            <td class="mono" style="font-family:ui-monospace;font-variant-numeric:tabular-nums">${rm(p.cost)}</td>
+            <td class="mono" style="font-family:ui-monospace;font-variant-numeric:tabular-nums">${rm(p.price)}</td>
+            <td style="font-family:ui-monospace;font-weight:700;font-variant-numeric:tabular-nums;color:${c.profit<0?'var(--red)':'var(--green)'}">${rm(c.profit)}</td>
+            <td style="font-family:ui-monospace;font-weight:700;font-variant-numeric:tabular-nums;color:${c.profit<0?'var(--red)':c.margin<10?'var(--orange)':'var(--green)'}">${pct(c.margin)}</td>
+            <td>${AUDIT_BADGE[c.status]}</td>
+            <td style="font-family:ui-monospace;font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent)">${c.sug.ok?rm(c.sug.price):'—'}${c.sug.ok&&c.sug.price>p.price?' ↑':''}</td>
+            <td><button class="btn btn-outline btn-sm" onclick="auditPDF(${i})">PDF</button></td>
+          </tr>`;}).join('')}
+      </tbody>
+    </table></div>
+  </div>`;
+}
+
+// ─── REPORT PDF ─────────────────────────────────────────────
+function reportShell(title, body) {
+  return `<!doctype html><html lang="ms"><head><meta charset="utf-8"><title>${title}</title><style>
+  @page{margin:13mm}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{font-family:system-ui,-apple-system,sans-serif;color:#191326;font-size:12px;line-height:1.55;padding:18px}
+  .head{background:linear-gradient(135deg,#F43F5E,#D946EF 55%,#8B5CF6);border-radius:14px;color:#fff;padding:20px 24px;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+  h1{font-size:19px;font-weight:800} .sub{opacity:.88;font-size:11px;margin-top:3px}
+  .brand{text-align:right;font-size:11px;opacity:.92}.brand b{display:block;font-size:13px}
+  .chips{display:flex;gap:9px;margin-bottom:14px}
+  .chip{flex:1;border:1px solid #E9E4F0;border-radius:10px;padding:9px 13px;font-size:10px;color:#6E6584;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+  .chip b{display:block;font-size:17px;margin-top:2px;letter-spacing:0;color:#191326}
+  .chip.r b{color:#DC2626}.chip.o b{color:#D97706}.chip.g b{color:#059669}
+  table{width:100%;border-collapse:collapse}
+  th{font-size:8.5px;text-transform:uppercase;letter-spacing:.05em;text-align:left;color:#6E6584;padding:6px 7px;border-bottom:2px solid #E9E4F0}
+  td{padding:6px 7px;border-bottom:1px solid #F3F0F7;font-size:10.5px;vertical-align:top}
+  tr{page-break-inside:avoid}
+  .num{font-variant-numeric:tabular-nums;font-family:ui-monospace,monospace}
+  .r{color:#DC2626;font-weight:700}.o{color:#D97706;font-weight:700}.g{color:#059669;font-weight:700}.a{color:#DB2777;font-weight:800}
+  .pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:8.5px;font-weight:800;white-space:nowrap}
+  .pill.rugi{background:#FEE2E2;color:#DC2626}.pill.bahaya{background:#FEF3C7;color:#D97706}.pill.sihat{background:#D1FAE5;color:#059669}
+  .sec{border:1px solid #E9E4F0;border-radius:12px;padding:15px 17px;margin-bottom:11px;page-break-inside:avoid}
+  .sec h2{font-size:13px;margin-bottom:8px}
+  .kv{display:flex;justify-content:space-between;padding:3.5px 0;border-bottom:1px solid #F7F4FA;font-size:11px}
+  .kv:last-child{border-bottom:none}.kv span:first-child{color:#6E6584}
+  .big{font-size:24px;font-weight:800}
+  .foot{margin-top:18px;padding-top:9px;border-top:1px solid #E9E4F0;font-size:8.5px;color:#8d84a3;line-height:1.6}
+  </style></head><body>${body}</body></html>`;
+}
+
+function printHTML(html) {
+  const f = document.createElement('iframe');
+  f.style.cssText = 'position:fixed;width:0;height:0;border:0;right:0;bottom:0';
+  f.srcdoc = html;
+  f.onload = () => { try { f.contentWindow.focus(); f.contentWindow.print(); } finally { setTimeout(()=>f.remove(), 4000); } };
+  document.body.appendChild(f);
+}
+
+function reportHead(title, sub) {
+  const d = new Date().toLocaleDateString('ms-MY',{day:'numeric',month:'long',year:'numeric'});
+  return `<div class="head"><div><h1>${title}</h1><div class="sub">${sub}</div></div>
+    <div class="brand"><b>ProfitCalc</b>dynopro.my<br>${d}</div></div>`;
+}
+
+const REPORT_FOOT = `<div class="foot">Kadar fee: anggaran umum Shopee MY &amp; TikTok Shop MY berkuat kuasa Feb 2026 (termasuk 8% SST). Kadar sebenar berbeza ikut sub-kategori &amp; status penjual — sahkan di Seller Centre. Dijana oleh ProfitCalc · dynopro.my</div>`;
+
+window.auditPDF = i => {
+  const p = S.audit.rows[i]; if (!p) return;
+  const c = auditCalc(p);
+  const st = {rugi:['rugi','🔴 RUGI'],bahaya:['bahaya','🟠 BAHAYA'],sihat:['sihat','🟢 SIHAT']}[c.status];
+  const body = `
+  ${reportHead('Report Untung Produk', e(p.name))}
+  <div class="chips">
+    <div class="chip">Status<b class="${c.status==='rugi'?'r':c.status==='bahaya'?'o':'g'}">${st[1]}</b></div>
+    <div class="chip">Untung / Unit<b class="${c.profit<0?'r':'g'}">${rm(c.profit)}</b></div>
+    <div class="chip">Margin<b class="${c.profit<0?'r':c.margin<10?'o':'g'}">${pct(c.margin)}</b></div>
+    <div class="chip">Harga Cadangan<b class="a">${c.sug.ok?rm(c.sug.price):'—'}</b></div>
+  </div>
+  <div class="sec"><h2>Maklumat Produk</h2>
+    <div class="kv"><span>Nama</span><span>${e(p.name)}</span></div>
+    <div class="kv"><span>Platform</span><span>${p.platform==='shopee'?'Shopee Malaysia':'TikTok Shop Malaysia'}</span></div>
+    <div class="kv"><span>Kategori</span><span>${e(p.category)}</span></div>
+    <div class="kv"><span>Harga jual semasa</span><span class="num">${rm(p.price)}</span></div>
+    <div class="kv"><span>Jumlah kos</span><span class="num">${rm(p.cost)}</span></div>
+  </div>
+  <div class="sec"><h2>Pecahan Untung (pada harga semasa)</h2>
+    <div class="kv"><span>Harga jual</span><span class="num">${rm(p.price)}</span></div>
+    <div class="kv"><span>(−) Fee marketplace ${(c.rule.c+c.rule.t+c.rule.p).toFixed(2)}% + RM${(+c.rule.flat||0).toFixed(2)}</span><span class="num">−${rm(c.fees)}</span></div>
+    <div class="kv"><span>(−) Iklan ${p.ads||0}%</span><span class="num">−${rm(c.ads)}</span></div>
+    <div class="kv"><span>(−) Kos produk</span><span class="num">−${rm(p.cost)}</span></div>
+    <div class="kv"><span><b>Untung bersih / unit</b></span><span class="num ${c.profit<0?'r':'g'}"><b>${rm(c.profit)}</b></span></div>
+  </div>
+  <div class="sec"><h2>Cadangan</h2>
+    ${c.sug.ok?`
+    <div class="kv"><span>Harga baru untuk margin ${S.audit.target}%</span><span class="num a big">${rm(c.sug.price)}</span></div>
+    <div class="kv"><span>Untung bersih baru / unit</span><span class="num g">${rm(c.sug.profit)}</span></div>
+    <div class="kv"><span>Perubahan harga</span><span class="num">${c.sug.price>=p.price?'+':''}${rm(c.sug.price-p.price)} (${p.price?((c.sug.price-p.price)/p.price*100).toFixed(1):'—'}%)</span></div>
+    `:`<div class="kv"><span>Sasaran margin ${S.audit.target}% tidak mungkin dengan fee semasa</span><span>—</span></div>`}
+  </div>
+  ${REPORT_FOOT}`;
+  printHTML(reportShell(`Report — ${p.name}`, body));
+};
+
+window.auditPDFAll = () => {
+  const A = S.audit; if (!A.rows.length) return;
+  const calcs = A.rows.map(auditCalc);
+  const n = {rugi:0,bahaya:0,sihat:0}; calcs.forEach(c=>n[c.status]++);
+  const totProfit = calcs.reduce((s,c)=>s+c.profit,0);
+  const body = `
+  ${reportHead('Report Premium — Audit Untung', `${A.rows.length} produk · sasaran margin ${A.target}% · ${e(A.fileName||'data manual')}`)}
+  <div class="chips">
+    <div class="chip">Jumlah Produk<b>${A.rows.length}</b></div>
+    <div class="chip r">Rugi<b>${n.rugi}</b></div>
+    <div class="chip o">Bahaya<b>${n.bahaya}</b></div>
+    <div class="chip g">Sihat<b>${n.sihat}</b></div>
+    <div class="chip">Untung Agregat / Unit<b class="${totProfit<0?'r':'g'}">${rm(totProfit)}</b></div>
+  </div>
+  <table>
+    <thead><tr><th>#</th><th>Produk</th><th>Platform</th><th>Kos</th><th>Harga</th><th>Fee</th><th>Untung</th><th>Margin</th><th>Status</th><th>Harga Cadangan</th></tr></thead>
+    <tbody>
+      ${A.rows.map((p,i)=>{const c=calcs[i];return `<tr>
+        <td>${i+1}</td>
+        <td><b>${e(p.name)}</b><br><span style="font-size:8.5px;color:#8d84a3">${e(p.category)}${p.ads?` · iklan ${p.ads}%`:''}</span></td>
+        <td>${p.platform==='shopee'?'Shopee':'TikTok'}</td>
+        <td class="num">${rm(p.cost)}</td>
+        <td class="num">${rm(p.price)}</td>
+        <td class="num">${rm(c.fees+c.ads)}</td>
+        <td class="num ${c.profit<0?'r':'g'}">${rm(c.profit)}</td>
+        <td class="num ${c.profit<0?'r':c.margin<10?'o':'g'}">${pct(c.margin)}</td>
+        <td><span class="pill ${c.status}">${c.status.toUpperCase()}</span></td>
+        <td class="num a">${c.sug.ok?rm(c.sug.price):'—'}</td>
+      </tr>`;}).join('')}
+    </tbody>
+  </table>
+  ${REPORT_FOOT}`;
+  printHTML(reportShell('Report Premium — Audit Untung', body));
+};
+
 // ─── ESCAPE ─────────────────────────────────────────────────
 function e(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -1102,7 +1463,7 @@ function render() {
   document.getElementById('page-label').textContent = PAGE_TITLE[S.view] || '';
   renderNav();
   const content = document.getElementById('content');
-  const views = {dashboard:viewDashboard,calculator:viewCalculator,saved:viewSaved,monitor:viewMonitor,admin:viewAdmin};
+  const views = {dashboard:viewDashboard,calculator:viewCalculator,reverse:viewReverse,audit:viewAudit,saved:viewSaved,monitor:viewMonitor,admin:viewAdmin};
   content.innerHTML = (views[S.view]||viewCalculator)();
 }
 
