@@ -1,4 +1,5 @@
 <title>ProfitCalc — Malaysia Sellers</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#A21CAF">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
@@ -108,7 +109,7 @@ body{background:var(--wash) fixed}
 /* ─── LAYOUT ─── */
 .shell{display:flex;min-height:100vh}
 .sidebar{width:var(--sidebar-w);background:var(--sidebar-bg);display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;z-index:50;overflow-y:auto}
-.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.main{margin-left:var(--sidebar-w);flex:1;min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .topbar{height:52px;background:color-mix(in srgb,var(--surface) 78%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:40}
 .content{padding:18px 20px 40px;max-width:900px}
 
@@ -335,17 +336,38 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 .conf-fill{height:100%;border-radius:2px;background:var(--grad)}
 .conf-label{font-size:10px;color:var(--text-4);font-family:ui-monospace,monospace;width:30px;text-align:right;font-weight:600}
 
+/* ─── BOTTOM NAV (mobile) ─── */
+.bottom-nav{display:none}
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -18px;padding:0 18px}
+.tbl-scroll .tbl{min-width:560px}
+
 /* ─── RESPONSIVE ─── */
 @media(max-width:800px){
-  :root{--sidebar-w:54px}
-  .sb-logo-text,.sb-logo-sub,.sb-item span:last-child,.sb-section,.sb-footer{display:none}
-  .stats-row{grid-template-columns:1fr 1fr}
+  .sidebar{display:none}
+  .main{margin-left:0}
+  .content{padding:14px 14px calc(84px + env(safe-area-inset-bottom));max-width:100%}
+  .topbar{padding:0 14px}
+  .tb-logo{display:flex!important}
+  .bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:60;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--border);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+  .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;border:none;background:none;color:var(--text-4);font-size:10px;font-weight:600;cursor:pointer;border-radius:10px;font-family:inherit;transition:color .14s}
+  .bn-icon{font-size:19px;line-height:1.2}
+  .bn-item.active{color:var(--accent)}
+  .bn-item.active .bn-icon{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  input[type=text],input[type=number],select,.search-input{font-size:16px} /* elak auto-zoom iOS */
+  .search-input{width:150px}
+  .stats-row{grid-template-columns:1fr 1fr;gap:10px}
+  .stat{padding:13px}
+  .stat-val{font-size:19px}
   .result-grid{grid-template-columns:1fr 1fr}
   .grid2,.grid3{grid-template-columns:1fr}
   .price-pills,.scenario-grid,.platform-grid,.quick-grid{grid-template-columns:1fr}
-}
-@media(max-width:500px){
-  .stats-row{grid-template-columns:1fr}
+  .cost-row{grid-template-columns:1fr 30px 96px 30px;gap:5px}
+  .toggle-row{flex-wrap:wrap}
+  .sim-price{font-size:31px}
+  .card{padding:15px}
+  .tbl-scroll{margin:0 -15px;padding:0 15px}
+  .btn,.del-btn,.tog{touch-action:manipulation}
+  .admin-input{width:88px;font-size:15px}
 }
 .divider{border:none;border-top:1px solid var(--border-light);margin:12px 0}
 </style>
@@ -369,6 +391,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
   <!-- MAIN -->
   <div class="main">
     <div class="topbar">
+      <div class="tb-logo" style="display:none;align-items:center;justify-content:center;width:28px;height:28px;background:var(--grad);border-radius:8px;color:#fff;font-size:13px;font-weight:800;flex-shrink:0">P</div>
       <div class="page-label" id="page-label">Kalkulator Untung</div>
       <div class="topbar-right">
         <button class="theme-btn" id="theme-btn" title="Toggle tema">☀️</button>
@@ -378,6 +401,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
     <div class="content" id="content"></div>
   </div>
 </div>
+
+<nav class="bottom-nav" id="bottom-nav" aria-label="Navigasi utama"></nav>
 
 <script>
 // ─── FEE DATABASE ───────────────────────────────────────────
@@ -521,6 +546,19 @@ function renderNav() {
       </button>
     `).join('')}
   `).join('');
+
+  const BN = [
+    {key:'dashboard', icon:'◈',  label:'Utama'},
+    {key:'calculator',icon:'🧮', label:'Kira'},
+    {key:'saved',     icon:'📦', label:'Produk'},
+    {key:'monitor',   icon:'📡', label:'Fee'},
+    {key:'admin',     icon:'⚙',  label:'Admin'},
+  ];
+  document.getElementById('bottom-nav').innerHTML = BN.map(b=>`
+    <button class="bn-item ${S.view===b.key?'active':''}" onclick="go('${b.key}')">
+      <span class="bn-icon">${b.icon}</span><span>${b.label}</span>
+    </button>
+  `).join('');
 }
 
 // ─── VIEWS ──────────────────────────────────────────────────
@@ -567,7 +605,7 @@ function viewDashboard() {
       <button class="btn btn-primary btn-sm" onclick="go('calculator')">+ Pengiraan Baru</button>
     </div>
     ${S.saved.length===0 ? `<div class="empty"><div class="empty-icon">📊</div><div class="empty-title">Tiada pengiraan lagi</div><div class="empty-sub">Buat pengiraan pertama untuk lihat insight untung di sini</div></div>` : `
-    <table class="tbl">
+    <div class="tbl-scroll"><table class="tbl">
       <thead><tr><th>Produk</th><th>Platform</th><th>Harga</th><th>Margin</th><th>Untung</th></tr></thead>
       <tbody>
         ${S.saved.slice(0,5).map(p=>`
@@ -580,7 +618,7 @@ function viewDashboard() {
           </tr>
         `).join('')}
       </tbody>
-    </table>`}
+    </table></div>`}
   </div>`;
 }
 
@@ -820,7 +858,7 @@ function savedList() {
   const filtered = S.saved.filter(p=>p.name.toLowerCase().includes(S.search.toLowerCase())||p.sku.toLowerCase().includes(S.search.toLowerCase()));
   return `${filtered.length===0
       ?`<div class="empty"><div class="empty-icon">📦</div><div class="empty-title">Tiada produk ditemui</div><div class="empty-sub">Cuba carian lain atau buat produk baru</div></div>`
-      :`<table class="tbl">
+      :`<div class="tbl-scroll"><table class="tbl">
         <thead><tr><th>Produk</th><th>Platform</th><th>Harga</th><th>Margin</th><th>Untung</th><th></th></tr></thead>
         <tbody>
           ${filtered.map(p=>`
@@ -834,7 +872,7 @@ function savedList() {
             </tr>
           `).join('')}
         </tbody>
-      </table>`}`;
+      </table></div>`}`;
 }
 
 function viewSaved() {
@@ -933,7 +971,7 @@ function viewAdmin() {
       <button class="tab-btn ${S.adminTab==='shopee'?'on':''}" onclick="S.adminTab='shopee';render()">🛍️ Shopee Malaysia</button>
       <button class="tab-btn ${S.adminTab==='tiktok'?'on':''}" onclick="S.adminTab='tiktok';render()">🎵 TikTok Shop Malaysia</button>
     </div>
-    <table class="tbl">
+    <div class="tbl-scroll"><table class="tbl">
       <thead><tr><th>Kategori</th><th>Komisyen %</th><th>Transaksi %</th><th>Program %</th><th>Tetap RM</th><th>Jumlah</th><th>Status</th></tr></thead>
       <tbody>
         ${Object.entries(db.categories).map(([cat,rule])=>`
@@ -947,7 +985,7 @@ function viewAdmin() {
           </tr>
         `).join('')}
       </tbody>
-    </table>
+    </table></div>
   </div>`;
 }
 
