@@ -1,4 +1,8 @@
 <title>ProfitCalc — Malaysia Sellers</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#C0000A">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <style>
 :root {
   --accent:        #C0000A;
@@ -1037,4 +1041,9 @@ function render() {
 }
 
 render();
+
+// PWA: daftar service worker jika dilayan dari web (gagal senyap di tempat lain)
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
 </script>
