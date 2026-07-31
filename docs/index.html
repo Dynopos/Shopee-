@@ -1,0 +1,1040 @@
+<title>ProfitCalc — Malaysia Sellers</title>
+<style>
+:root {
+  --accent:        #C0000A;
+  --accent-dim:    #9B0008;
+  --accent-bg:     #FEF2F2;
+  --accent-border: #FECACA;
+  --bg:            #F4F5F7;
+  --surface:       #FFFFFF;
+  --border:        #E5E7EB;
+  --border-light:  #F3F4F6;
+  --text:          #111827;
+  --text-2:        #374151;
+  --text-3:        #6B7280;
+  --text-4:        #9CA3AF;
+  --green:         #059669;
+  --green-bg:      #ECFDF5;
+  --green-border:  #A7F3D0;
+  --orange:        #D97706;
+  --orange-bg:     #FFFBEB;
+  --orange-border: #FDE68A;
+  --red:           #EF4444;
+  --sidebar-bg:    #C0000A;
+  --sidebar-w:     210px;
+  --radius:        10px;
+  --radius-sm:     7px;
+  --shadow:        0 1px 3px rgba(0,0,0,.06);
+  --shadow-md:     0 4px 12px rgba(0,0,0,.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:           #0F1117;
+    --surface:      #1A1D27;
+    --border:       #2D3040;
+    --border-light: #232636;
+    --text:         #F3F4F6;
+    --text-2:       #D1D5DB;
+    --text-3:       #9CA3AF;
+    --text-4:       #6B7280;
+    --green:        #34D399;
+    --green-bg:     #064E3B;
+    --green-border: #065F46;
+    --orange:       #FBBF24;
+    --orange-bg:    #451A03;
+    --orange-border:#92400E;
+    --red:          #F87171;
+    --accent-bg:    #1F0507;
+    --accent-border:#7F1D1D;
+    --sidebar-bg:   #8B0007;
+    --shadow:        0 1px 3px rgba(0,0,0,.3);
+    --shadow-md:     0 4px 12px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"] {
+  --bg:#0F1117; --surface:#1A1D27; --border:#2D3040; --border-light:#232636;
+  --text:#F3F4F6; --text-2:#D1D5DB; --text-3:#9CA3AF; --text-4:#6B7280;
+  --green:#34D399; --green-bg:#064E3B; --green-border:#065F46;
+  --orange:#FBBF24; --orange-bg:#451A03; --orange-border:#92400E;
+  --red:#F87171; --accent-bg:#1F0507; --accent-border:#7F1D1D;
+  --sidebar-bg:#8B0007; --shadow:0 1px 3px rgba(0,0,0,.3); --shadow-md:0 4px 12px rgba(0,0,0,.4);
+}
+:root[data-theme="light"] {
+  --bg:#F4F5F7; --surface:#FFFFFF; --border:#E5E7EB; --border-light:#F3F4F6;
+  --text:#111827; --text-2:#374151; --text-3:#6B7280; --text-4:#9CA3AF;
+  --green:#059669; --green-bg:#ECFDF5; --green-border:#A7F3D0;
+  --orange:#D97706; --orange-bg:#FFFBEB; --orange-border:#FDE68A;
+  --red:#EF4444; --accent-bg:#FEF2F2; --accent-border:#FECACA;
+  --sidebar-bg:#C0000A; --shadow:0 1px 3px rgba(0,0,0,.06); --shadow-md:0 4px 12px rgba(0,0,0,.10);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* ─── LAYOUT ─── */
+.shell{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);background:var(--sidebar-bg);display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;z-index:50;overflow-y:auto}
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{height:52px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:40;box-shadow:var(--shadow)}
+.content{padding:18px 20px 40px;max-width:900px}
+
+/* ─── SIDEBAR ─── */
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.12);display:flex;align-items:center;gap:10px}
+.sb-logo-icon{width:32px;height:32px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-logo-icon svg{width:16px;height:16px}
+.sb-logo-text{font-size:13px;font-weight:700;color:#fff;line-height:1.2}
+.sb-logo-sub{font-size:10px;color:rgba(255,255,255,.55);margin-top:1px}
+.sb-nav{padding:10px 8px;flex:1}
+.sb-section{font-size:9px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.1em;text-transform:uppercase;padding:10px 8px 4px}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;cursor:pointer;color:rgba(255,255,255,.65);font-size:12px;font-weight:500;transition:all .14s;border:none;background:none;width:100%;text-align:left}
+.sb-item:hover{background:rgba(255,255,255,.1);color:#fff}
+.sb-item.active{background:rgba(255,255,255,.18);color:#fff;font-weight:600}
+.sb-item .icon{font-size:13px;width:16px;text-align:center;flex-shrink:0}
+.sb-soon{font-size:8px;margin-left:auto;background:rgba(255,255,255,.14);padding:1px 5px;border-radius:3px;color:rgba(255,255,255,.6)}
+.sb-footer{padding:12px 14px;border-top:1px solid rgba(255,255,255,.1);font-size:10px;color:rgba(255,255,255,.4);line-height:1.7}
+.sb-footer strong{color:rgba(255,255,255,.65)}
+
+/* ─── TOPBAR ─── */
+.page-label{font-size:14px;font-weight:700;color:var(--text)}
+.topbar-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+.theme-btn{width:32px;height:32px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text-3);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .14s}
+.theme-btn:hover{border-color:var(--accent);color:var(--accent)}
+.avatar{width:32px;height:32px;border-radius:7px;background:var(--accent);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer}
+
+/* ─── CARDS ─── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
+.card-icon{width:26px;height:26px;background:var(--accent-bg);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;color:var(--accent)}
+.card-sub{font-size:11px;color:var(--text-3);margin-top:2px}
+
+/* ─── STATS GRID ─── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+.stat-label{font-size:10px;color:var(--text-4);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.stat-val{font-size:22px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
+.stat-val.red{color:var(--accent)} .stat-val.green{color:var(--green)}
+.stat-note{font-size:11px;color:var(--text-4);margin-top:4px}
+
+/* ─── FORM ─── */
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:11px;font-weight:600;color:var(--text-2)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+input[type=text],input[type=number],select{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;font-family:inherit;padding:8px 11px;outline:none;transition:border-color .14s,box-shadow .14s;width:100%}
+input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 12%,transparent)}
+input::placeholder{color:var(--text-4)}
+input.mono{font-variant-numeric:tabular-nums;font-family:ui-monospace,monospace}
+
+/* ─── COST ROWS ─── */
+.cost-row{display:grid;grid-template-columns:1fr 38px 110px 30px;gap:7px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border-light)}
+.cost-row:last-child{border-bottom:none}
+.cost-pfx{font-size:11px;color:var(--text-4);font-weight:600;text-align:center}
+.del-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text-4);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .14s}
+.del-btn:hover{border-color:var(--red);color:var(--red);background:var(--accent-bg)}
+
+/* ─── TOTAL BAR ─── */
+.total-bar{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:var(--radius-sm);margin-top:10px}
+.total-bar-label{font-size:12px;font-weight:600;color:var(--text-2)}
+.total-bar-val{font-variant-numeric:tabular-nums;font-size:16px;font-weight:800;color:var(--accent);font-family:ui-monospace,monospace}
+.total-bar.orange{background:var(--orange-bg);border-color:var(--orange-border)}
+.total-bar.orange .total-bar-val{color:var(--orange)}
+
+/* ─── PLATFORM ─── */
+.platform-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.platform-card{border:2px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;transition:all .14s;background:var(--bg)}
+.platform-card:hover{border-color:var(--text-4);background:var(--surface)}
+.platform-card.selected{border-color:var(--accent);background:var(--accent-bg)}
+.platform-name{font-size:13px;font-weight:700;color:var(--text);margin:8px 0 2px}
+.platform-fee{font-size:11px;color:var(--text-3)}
+
+/* ─── TOGGLES ─── */
+.toggle-row{display:flex;align-items:center;gap:9px;padding:9px 12px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border);margin-bottom:5px;transition:all .14s}
+.toggle-row.on{border-color:var(--accent-border);background:var(--accent-bg)}
+.toggle-label{font-size:12px;color:var(--text-2);font-weight:500;flex:1}
+.tog{width:34px;height:19px;background:var(--border);border-radius:10px;position:relative;cursor:pointer;transition:background .18s;flex-shrink:0;border:none}
+.tog.on{background:var(--accent)}
+.tog::after{content:'';position:absolute;width:13px;height:13px;background:#fff;border-radius:50%;top:3px;left:3px;transition:transform .18s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.tog.on::after{transform:translateX(15px)}
+.mkt-inputs{display:flex;gap:5px;align-items:center}
+.seg{display:flex;background:var(--surface);border-radius:5px;border:1px solid var(--border);overflow:hidden}
+.seg button{padding:4px 8px;font-size:10px;font-weight:600;color:var(--text-3);background:none;border:none;cursor:pointer;font-family:inherit}
+.seg button.on{background:var(--accent);color:#fff}
+.mkt-preview{font-size:11px;color:var(--text-3);width:58px;text-align:right;font-variant-numeric:tabular-nums;font-family:ui-monospace,monospace;font-weight:600}
+
+/* ─── PRICE PILLS ─── */
+.price-pills{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.pill{border-radius:var(--radius);padding:13px;text-align:center}
+.pill.breakeven{background:var(--accent-bg);border:1px solid var(--accent-border)}
+.pill.recommend{background:var(--accent-bg);border:2px solid var(--accent)}
+.pill.premium{background:var(--green-bg);border:1px solid var(--green-border)}
+.pill-label{font-size:9px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em}
+.pill-val{font-variant-numeric:tabular-nums;font-size:17px;font-weight:800;margin-top:3px;font-family:ui-monospace,monospace}
+.pill.breakeven .pill-val{color:var(--red)}
+.pill.recommend .pill-val{color:var(--accent)}
+.pill.premium .pill-val{color:var(--green)}
+
+/* ─── RESULTS ─── */
+.result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.result-item{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;transition:all .14s}
+.result-item:hover{border-color:var(--accent-border);background:var(--accent-bg)}
+.result-label{font-size:10px;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.result-val{font-variant-numeric:tabular-nums;font-size:19px;font-weight:800;font-family:ui-monospace,monospace;color:var(--text)}
+.result-val.green{color:var(--green)} .result-val.red{color:var(--red)} .result-val.primary{color:var(--accent)} .result-val.orange{color:var(--orange)}
+
+/* ─── FEE BREAKDOWN ─── */
+.fee-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:13px}
+.fee-box-title{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:9px}
+.fee-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0}
+.fee-key{font-size:11px;color:var(--text-3)}
+.fee-val{font-size:11px;font-family:ui-monospace,monospace;color:var(--text-2);font-weight:600;font-variant-numeric:tabular-nums}
+.fee-total-row{display:flex;justify-content:space-between;padding-top:7px;margin-top:5px;border-top:1px solid var(--border)}
+.fee-total-key{font-size:12px;font-weight:700;color:var(--text)}
+.fee-total-val{font-size:13px;font-weight:800;font-family:ui-monospace,monospace;color:var(--accent);font-variant-numeric:tabular-nums}
+
+/* ─── SLIDER ─── */
+.sim-display{text-align:center;padding:18px;background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:var(--radius);margin-bottom:16px}
+.sim-price{font-variant-numeric:tabular-nums;font-size:38px;font-weight:800;color:var(--accent);font-family:ui-monospace,monospace}
+.sim-note{font-size:11px;color:var(--text-3);margin-top:3px;text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:3px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid var(--accent);box-shadow:0 2px 6px color-mix(in srgb,var(--accent) 30%,transparent);cursor:pointer}
+.slider-labels{display:flex;justify-content:space-between;margin-top:7px}
+.slider-label{font-size:10px;color:var(--text-4);font-family:ui-monospace,monospace;font-variant-numeric:tabular-nums}
+
+/* ─── SCENARIOS ─── */
+.scenario-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.scenario-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;transition:all .14s}
+.scenario-card:hover{border-color:var(--accent-border)}
+.scenario-eyebrow{font-size:9px;color:var(--accent);font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px}
+.scenario-name{font-size:12px;color:var(--text);font-weight:700;margin-bottom:8px}
+.sc-row{display:flex;justify-content:space-between;align-items:center;padding:2px 0}
+.sc-key{font-size:11px;color:var(--text-3)}
+.sc-val{font-size:11px;font-weight:700;font-family:ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.sc-val.g{color:var(--green)} .sc-val.r{color:var(--red)}
+
+/* ─── BTNS ─── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;transition:all .14s;border:none;font-family:inherit}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 2px 8px color-mix(in srgb,var(--accent) 30%,transparent)}
+.btn-primary:hover{background:var(--accent-dim);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-outline{background:var(--surface);color:var(--text-2);border:1px solid var(--border)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn-danger{background:var(--accent-bg);color:var(--red);border:1px solid var(--accent-border)}
+.btn-danger:hover{background:var(--accent-bg)}
+.btn-sm{padding:5px 11px;font-size:11px}
+
+/* ─── AI BOX ─── */
+.ai-box{background:linear-gradient(135deg,var(--accent-bg),var(--surface));border:1px solid var(--accent-border);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+.ai-head{display:flex;align-items:center;gap:8px;margin-bottom:11px}
+.ai-dot{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.ai-badge{font-size:10px;font-weight:800;color:var(--accent);letter-spacing:.08em}
+.ai-rating{font-size:11px;font-weight:800;padding:2px 9px;background:var(--surface);border-radius:20px;border:1px solid var(--border);margin-left:auto}
+.ai-summary{font-size:13px;color:var(--text);font-weight:600;margin-bottom:9px}
+.ai-tip{display:flex;gap:7px;font-size:11px;color:var(--text-2);padding:6px 9px;background:var(--surface);border-radius:6px;border:1px solid var(--accent-border);border-left:3px solid var(--accent);margin-bottom:5px}
+.ai-rec{display:flex;align-items:center;gap:10px;margin-top:11px;padding-top:11px;border-top:1px solid var(--accent-border)}
+.ai-rec-label{font-size:11px;color:var(--text-3);font-weight:600}
+.ai-rec-price{font-variant-numeric:tabular-nums;font-size:17px;font-weight:800;color:var(--accent);font-family:ui-monospace,monospace}
+
+/* ─── SPINNER ─── */
+.spinner{width:13px;height:13px;border:2px solid var(--accent-border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ─── TABLE ─── */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:10px;font-weight:700;color:var(--text-3);text-align:left;padding:9px 12px;background:var(--bg);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.04em}
+.tbl td{font-size:12px;color:var(--text-2);padding:11px 12px;border-bottom:1px solid var(--border-light)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--accent-bg)}
+
+/* ─── BADGE ─── */
+.badge{display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
+.badge-shopee{background:#FFF0EE;color:#EE4D2D}
+.badge-tiktok{background:var(--border-light);color:var(--text)}
+.badge-ok{background:var(--green-bg);color:var(--green)}
+.badge-warn{background:var(--orange-bg);color:var(--orange)}
+
+/* ─── SEARCH ─── */
+.search-wrap{position:relative}
+.search-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text-4);font-size:12px}
+.search-input{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:12px;font-family:inherit;padding:7px 11px 7px 28px;outline:none;width:200px}
+.search-input:focus{border-color:var(--accent)}
+
+/* ─── TABS ─── */
+.tabs{display:flex;gap:2px;background:var(--border-light);border-radius:8px;padding:3px;margin-bottom:14px}
+.tab-btn{flex:1;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;color:var(--text-3);background:none;border:none;font-family:inherit;transition:all .14s}
+.tab-btn.on{background:var(--surface);color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+
+/* ─── ADMIN INPUT ─── */
+.admin-input{background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:11px;font-family:ui-monospace,monospace;padding:4px 7px;outline:none;width:66px;text-align:right;font-variant-numeric:tabular-nums}
+.admin-input:focus{border-color:var(--accent)}
+
+/* ─── ALERT ─── */
+.alert{display:flex;align-items:flex-start;gap:9px;padding:10px 14px;border-radius:var(--radius-sm);margin-bottom:14px;font-size:12px}
+.alert.warn{background:var(--orange-bg);border:1px solid var(--orange-border);color:var(--orange)}
+
+/* ─── QUICK CARDS ─── */
+.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.quick-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;cursor:pointer;transition:all .18s;box-shadow:var(--shadow)}
+.quick-card:hover{border-color:var(--accent);box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.quick-icon{font-size:28px;margin-bottom:10px}
+.quick-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.quick-sub{font-size:11px;color:var(--text-3);line-height:1.5}
+
+/* ─── EMPTY ─── */
+.empty{text-align:center;padding:44px 20px}
+.empty-icon{font-size:44px;margin-bottom:12px}
+.empty-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:5px}
+.empty-sub{font-size:12px;color:var(--text-3)}
+
+/* ─── MONITOR ─── */
+.monitor-item{display:flex;gap:11px;align-items:flex-start;padding:12px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border);margin-bottom:7px;transition:all .14s}
+.monitor-item:hover{border-color:var(--accent-border)}
+.mon-dot{width:8px;height:8px;border-radius:50%;margin-top:3px;flex-shrink:0}
+.mon-dot.ok{background:var(--green)} .mon-dot.chg{background:var(--orange);animation:pulse 2s infinite}
+.mon-source{font-size:12px;color:var(--text);font-weight:600}
+.mon-detail{font-size:11px;color:var(--text-4);margin-top:1px}
+.mon-change{font-size:11px;color:var(--orange);margin-top:3px;font-weight:600}
+.conf-bar{display:flex;align-items:center;gap:7px;margin-top:5px}
+.conf-track{height:4px;background:var(--border);border-radius:2px;flex:1;overflow:hidden}
+.conf-fill{height:100%;border-radius:2px;background:linear-gradient(to right,var(--accent),var(--red))}
+.conf-label{font-size:10px;color:var(--text-4);font-family:ui-monospace,monospace;width:30px;text-align:right;font-weight:600}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:800px){
+  :root{--sidebar-w:54px}
+  .sb-logo-text,.sb-logo-sub,.sb-item span:last-child,.sb-section,.sb-footer{display:none}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .result-grid{grid-template-columns:1fr 1fr}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .price-pills,.scenario-grid,.platform-grid,.quick-grid{grid-template-columns:1fr}
+}
+@media(max-width:500px){
+  .stats-row{grid-template-columns:1fr}
+}
+.divider{border:none;border-top:1px solid var(--border-light);margin:12px 0}
+</style>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sb">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#C0000A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div>
+        <div class="sb-logo-text">ProfitCalc</div>
+        <div class="sb-logo-sub">Malaysia Sellers</div>
+      </div>
+    </div>
+    <nav class="sb-nav" id="nav"></nav>
+    <div class="sb-footer"><strong>Database: Live</strong><br>Shopee MY ✓<br>TikTok Shop MY ✓</div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="page-label" id="page-label">Kalkulator Untung</div>
+      <div class="topbar-right">
+        <button class="theme-btn" id="theme-btn" title="Toggle tema">☀️</button>
+        <div class="avatar">P</div>
+      </div>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<script>
+// ─── FEE DATABASE ───────────────────────────────────────────
+// Kadar berkuat kuasa Feb 2026, termasuk 8% SST.
+// c   = Komisyen marketplace
+// t   = Fee transaksi/pembayaran (standard, bukan SPayLater)
+// p   = Fee program (Shopee: Free Shipping/CCB ~5.94% · TikTok: Bonus Cashback ~4.86%)
+// flat= Platform Support Fee tetap setiap pesanan (RM0.54 termasuk SST)
+// Komisyen sebenar berbeza ikut sub-kategori — sahkan di Seller Centre.
+const FEE_DB = {
+  shopee:{name:"Shopee Malaysia",categories:{
+    "Fashion":          {c:10.26,t:3.78,p:5.94,flat:0.54},
+    "Electronics":      {c:10.26,t:3.78,p:5.94,flat:0.54},
+    "Health & Beauty":  {c:10.26,t:3.78,p:5.94,flat:0.54},
+    "Home & Living":    {c:10.26,t:3.78,p:5.94,flat:0.54},
+    "Food & Beverages": {c:10.26,t:3.78,p:5.94,flat:0.54},
+  }},
+  tiktok:{name:"TikTok Shop Malaysia",categories:{
+    "Fashion":          {c:8.37, t:3.78,p:4.86,flat:0.54},
+    "Electronics":      {c:7.02, t:3.78,p:4.86,flat:0.54},
+    "Health & Beauty":  {c:8.37, t:3.78,p:4.86,flat:0.54},
+    "Home & Living":    {c:8.37, t:3.78,p:4.86,flat:0.54},
+    "Food & Beverages": {c:10.26,t:3.78,p:4.86,flat:0.54},
+  }}
+};
+const CATS = Object.keys(FEE_DB.shopee.categories);
+
+// ─── HELPERS ────────────────────────────────────────────────
+const rm = v => `RM${(+v||0).toFixed(2)}`;
+const pct = v => `${(+v||0).toFixed(1)}%`;
+const profitColor = v => +v >= 0 ? 'green' : 'red';
+const marginColor = v => +v >= 15 ? 'green' : +v >= 5 ? 'orange' : 'red';
+const roiColor = v => +v >= 20 ? 'green' : +v >= 0 ? 'orange' : 'red';
+
+// ─── COMPUTATION ────────────────────────────────────────────
+function feeRule(state) {
+  const db = state.feeDb || FEE_DB;
+  return (db[state.platform]?.categories?.[state.category]) || {c:10.26,t:3.78,p:5.94,flat:0.54};
+}
+function calcFees(price, rule) {
+  const c=price*(rule.c/100), t=price*(rule.t/100), pl=price*(rule.p/100), flat=+rule.flat||0;
+  return {c,t,pl,flat,total:c+t+pl+flat};
+}
+function calcMkt(price, mkt) {
+  let total=0;
+  Object.values(mkt).forEach(item => {
+    if(!item.on) return;
+    total += item.type==='pct' ? price*(item.v/100) : item.v;
+  });
+  return total;
+}
+function compute(state) {
+  const rule = feeRule(state);
+  const price = state.price;
+  const productCost = state.costs.reduce((s,c)=>s+(+c.amount||0),0);
+  const fees = calcFees(price, rule);
+  const mktTotal = calcMkt(price, state.mkt);
+  const totalCost = productCost + fees.total + mktTotal;
+  const netProfit = price - totalCost;
+  const margin = price > 0 ? (netProfit/price)*100 : 0;
+  const roi = productCost > 0 ? (netProfit/productCost)*100 : 0;
+  return { rule, productCost, fees, mktTotal, totalCost, netProfit, margin, roi,
+    sellerPayout: price - fees.total,
+    breakEven: totalCost,
+    recommended: totalCost * 1.20,
+    premium: totalCost * 1.35,
+  };
+}
+function computeScenario(state, mktOverride) {
+  const s2 = {...state, mkt: mktOverride};
+  return compute(s2);
+}
+
+// ─── STATE ──────────────────────────────────────────────────
+const S = {
+  view: 'calculator',
+  platform: 'shopee',
+  category: 'Health & Beauty',
+  productName: '',
+  sku: '',
+  costs: [
+    {id:1,label:'Kos Produk',amount:''},{id:2,label:'Pembungkusan',amount:''},
+    {id:3,label:'Bubble Wrap',amount:''},{id:4,label:'Kotak',amount:''},
+    {id:5,label:'Stiker',amount:''},{id:6,label:'Buruh',amount:''},
+    {id:7,label:'Yuran Pengurusan',amount:''},{id:8,label:'Bahan Penghantaran',amount:''},
+    {id:9,label:'Kos Shipping (Pos/Kurier)',amount:''},
+    {id:10,label:'Hadiah Percuma',amount:''},{id:11,label:'Lain-lain',amount:''},
+  ],
+  mkt: {
+    affiliate:   {label:'Affiliate',on:false,v:10,type:'pct'},
+    gmvMax:      {label:'GMV Max',on:false,v:5,type:'pct'},
+    ads:         {label:'Ads Marketplace',on:false,v:0,type:'fix'},
+    voucher:     {label:'Voucher',on:false,v:5,type:'pct'},
+    coins:       {label:'Coins Cashback',on:false,v:1,type:'pct'},
+    freeShipping:{label:'Free Shipping',on:false,v:0,type:'fix'},
+    campaign:    {label:'Campaign',on:false,v:0,type:'fix'},
+  },
+  price: 35.90,
+  saved: [
+    {id:1,name:'Skincare Set Premium',sku:'SKN-001',platform:'shopee',category:'Health & Beauty',margin:23.4,profit:8.20,price:35.90},
+    {id:2,name:'Tudung Bawal Cotton',sku:'FAS-042',platform:'tiktok',category:'Fashion',margin:31.2,profit:12.50,price:40.00},
+    {id:3,name:'Air Fryer Mini 2L',sku:'ELC-019',platform:'shopee',category:'Electronics',margin:18.7,profit:28.00,price:149.90},
+  ],
+  search: '',
+  adminTab: 'shopee',
+  feeDb: JSON.parse(JSON.stringify(FEE_DB)),
+  aiAdvice: null,
+  aiLoading: false,
+  nextId: 100,
+};
+
+// ─── NAV ────────────────────────────────────────────────────
+const NAV = [
+  {section:'UTAMA',items:[{key:'dashboard',icon:'◈',label:'Overview'}]},
+  {section:'APPS',items:[
+    {key:'calculator',icon:'🧮',label:'Kalkulator'},
+    {key:'saved',icon:'📦',label:'Produk Tersimpan'},
+    {key:'monitor',icon:'📡',label:'Pemantau Fee'},
+  ]},
+  {section:'ADMIN',items:[{key:'admin',icon:'⚙',label:'Enjin Fee'}]},
+  {section:'AKAN DATANG',items:[
+    {key:null,icon:'🤖',label:'AI Generator',soon:true},
+    {key:null,icon:'📊',label:'Analytics',soon:true},
+  ]},
+];
+
+const PAGE_TITLE = {dashboard:'Overview',calculator:'Kalkulator Untung',saved:'Produk Tersimpan',monitor:'Pemantau Fee',admin:'Enjin Fee'};
+
+// ─── RENDER NAV ─────────────────────────────────────────────
+function renderNav() {
+  const nav = document.getElementById('nav');
+  nav.innerHTML = NAV.map(sec => `
+    <div class="sb-section">${sec.section}</div>
+    ${sec.items.map(item => `
+      <button class="sb-item ${S.view===item.key?'active':''}"
+        ${item.key ? `onclick="go('${item.key}')"` : ''}
+        style="${item.soon?'opacity:.4;cursor:not-allowed':''}">
+        <span class="icon">${item.icon}</span>
+        <span>${item.label}</span>
+        ${item.soon?'<span class="sb-soon">SOON</span>':''}
+      </button>
+    `).join('')}
+  `).join('');
+}
+
+// ─── VIEWS ──────────────────────────────────────────────────
+function viewDashboard() {
+  const avg = arr => arr.length ? arr.reduce((s,x)=>s+x,0)/arr.length : 0;
+  const avMargin = avg(S.saved.map(p=>p.margin));
+  const avProfit = avg(S.saved.map(p=>p.profit));
+  return `
+  <div class="stats-row">
+    ${[
+      {label:'Jumlah Produk',val:S.saved.length,note:'Pengiraan tersimpan',cls:''},
+      {label:'Purata Margin',val:pct(avMargin),note:'Semua produk',cls:'red'},
+      {label:'Purata Untung',val:rm(avProfit),note:'Bersih setiap produk',cls:'green'},
+      {label:'Platform Aktif',val:'2',note:'Shopee + TikTok Shop',cls:''},
+    ].map(s=>`
+      <div class="stat">
+        <div class="stat-label">${s.label}</div>
+        <div class="stat-val ${s.cls}">${s.val}</div>
+        <div class="stat-note">${s.note}</div>
+      </div>
+    `).join('')}
+  </div>
+
+  <div class="quick-grid">
+    ${[
+      {icon:'🧮',title:'Pengiraan Baru',sub:'Kira untung sebenar sebelum listing',view:'calculator'},
+      {icon:'📡',title:'Pemantau Fee',sub:'Semak kemas kini fee platform terkini',view:'monitor'},
+      {icon:'⚙',title:'Panel Admin',sub:'Edit kadar fee tanpa sentuh kod',view:'admin'},
+    ].map(q=>`
+      <div class="quick-card" onclick="go('${q.view}')">
+        <div class="quick-icon">${q.icon}</div>
+        <div class="quick-title">${q.title}</div>
+        <div class="quick-sub">${q.sub}</div>
+      </div>
+    `).join('')}
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <div class="card-title"><span class="card-icon">📋</span>Pengiraan Terkini</div>
+        <div class="card-sub">Pengiraan untung produk terbaru anda</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="go('calculator')">+ Pengiraan Baru</button>
+    </div>
+    ${S.saved.length===0 ? `<div class="empty"><div class="empty-icon">📊</div><div class="empty-title">Tiada pengiraan lagi</div><div class="empty-sub">Buat pengiraan pertama untuk lihat insight untung di sini</div></div>` : `
+    <table class="tbl">
+      <thead><tr><th>Produk</th><th>Platform</th><th>Harga</th><th>Margin</th><th>Untung</th></tr></thead>
+      <tbody>
+        ${S.saved.slice(0,5).map(p=>`
+          <tr>
+            <td><div style="font-weight:700;color:var(--text)">${e(p.name)}</div><div style="font-size:10px;color:var(--text-4)">${e(p.sku)}</div></td>
+            <td><span class="badge badge-${p.platform}">${p.platform==='shopee'?'🛍️ Shopee':'🎵 TikTok'}</span></td>
+            <td style="font-family:ui-monospace;font-weight:700;font-variant-numeric:tabular-nums">${rm(p.price)}</td>
+            <td style="font-family:ui-monospace;font-weight:700;color:${p.margin>20?'var(--green)':p.margin>10?'var(--orange)':'var(--red)'};">${pct(p.margin)}</td>
+            <td style="font-family:ui-monospace;font-weight:700;color:${p.profit>0?'var(--green)':'var(--red)'};">${rm(p.profit)}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>`}
+  </div>`;
+}
+
+function viewCalculator() {
+  const C = compute(S);
+  const rule = C.rule;
+  const minS = Math.max(C.productCost*0.8,1);
+  const maxS = Math.max(C.productCost*3, S.price*2, 100);
+  const sliderPct = Math.min(100,Math.max(0,((S.price-minS)/(maxS-minS))*100));
+  const mktMajKeys = Object.keys(S.mkt);
+  const feeTotal = rule.c+rule.t+rule.p;
+
+  const scenarios = [
+    {label:'A',name:'Tetapan Semasa',mkt:S.mkt},
+    {label:'B',name:'Affiliate OFF',mkt:{...S.mkt,affiliate:{...S.mkt.affiliate,on:false}}},
+    {label:'C',name:'Voucher 10%',mkt:{...S.mkt,voucher:{...S.mkt.voucher,on:true,v:10}}},
+    {label:'D',name:'GMV Max OFF',mkt:{...S.mkt,gmvMax:{...S.mkt.gmvMax,on:false}}},
+  ].map(s=>({...s,r:computeScenario(S,s.mkt)}));
+
+  return `
+  <!-- BASIC INFO -->
+  <div class="card">
+    <div class="card-head"><div class="card-title"><span class="card-icon">📦</span>Maklumat Asas</div></div>
+    <div class="grid2" style="margin-bottom:10px">
+      <div class="fg"><label>Nama Produk</label><input type="text" value="${e(S.productName)}" oninput="S.productName=this.value" placeholder="cth. Skincare Set Premium"/></div>
+      <div class="fg"><label>SKU</label><input type="text" value="${e(S.sku)}" oninput="S.sku=this.value" placeholder="cth. SKN-001"/></div>
+    </div>
+    <div class="fg"><label>Kategori</label><select onchange="S.category=this.value;render()">${CATS.map(c=>`<option ${S.category===c?'selected':''}>${c}</option>`).join('')}</select></div>
+  </div>
+
+  <!-- PLATFORM -->
+  <div class="card">
+    <div class="card-head"><div class="card-title"><span class="card-icon">🛒</span>Marketplace</div></div>
+    <div class="platform-grid" style="margin-bottom:12px">
+      ${[
+        {key:'shopee',icon:'🛍️',name:'Shopee Malaysia'},
+        {key:'tiktok',icon:'🎵',name:'TikTok Shop Malaysia'},
+      ].map(pl=>`
+        <div class="platform-card ${S.platform===pl.key?'selected':''}" onclick="S.platform='${pl.key}';render()">
+          <div style="font-size:26px">${pl.icon}</div>
+          <div class="platform-name">${pl.name}</div>
+          <div class="platform-fee">Komisyen ${S.feeDb[pl.key]?.categories?.[S.category]?.c||'?'}% · Dari database</div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="grid2">
+      <div class="fee-box">
+        <div class="fee-box-title">Kadar Fee — ${S.category} (Feb 2026, termasuk SST)</div>
+        <div class="fee-row"><span class="fee-key">Komisyen</span><span class="fee-val">${rule.c}%</span></div>
+        <div class="fee-row"><span class="fee-key">Transaksi</span><span class="fee-val">${rule.t}%</span></div>
+        <div class="fee-row"><span class="fee-key">Fee Program</span><span class="fee-val">${rule.p}%</span></div>
+        <div class="fee-row"><span class="fee-key">Fee Tetap / Pesanan</span><span class="fee-val">RM${(+rule.flat||0).toFixed(2)}</span></div>
+        <div class="fee-total-row"><span class="fee-total-key">Jumlah Fee</span><span class="fee-total-val">${feeTotal.toFixed(2)}% + RM${(+rule.flat||0).toFixed(2)}</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center">
+        <div style="font-size:10px;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">Pada Harga ${rm(S.price)}</div>
+        <div style="font-size:26px;font-weight:800;color:var(--accent);font-family:ui-monospace;font-variant-numeric:tabular-nums">${rm(C.fees.total)}</div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:3px">Jumlah fee marketplace</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--text-4);margin-top:10px;line-height:1.6">ℹ️ Kadar umum berkuat kuasa Feb 2026 (termasuk 8% SST). Komisyen sebenar berbeza ikut sub-kategori & status penjual (Mall/baru) — sahkan kadar anda di Seller Centre, atau edit di tab <b>Enjin Fee</b>.</div>
+  </div>
+
+  <!-- KOS -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title"><span class="card-icon">💰</span>Kos Produk</div>
+      <button class="btn btn-outline btn-sm" onclick="addCost()">+ Tambah Kos</button>
+    </div>
+    <div id="cost-list">
+      ${S.costs.map(c=>`
+        <div class="cost-row">
+          <input type="text" value="${e(c.label)}" oninput="updateCostLabel(${c.id},this.value)"/>
+          <span class="cost-pfx">RM</span>
+          <input class="mono" type="number" min="0" step="0.01" value="${c.amount}" placeholder="0.00" oninput="updateCostAmt(${c.id},this.value)"/>
+          <button class="del-btn" onclick="delCost(${c.id})">×</button>
+        </div>
+      `).join('')}
+    </div>
+    <div class="total-bar"><span class="total-bar-label">Jumlah Kos Produk</span><span class="total-bar-val">${rm(C.productCost)}</span></div>
+  </div>
+
+  <!-- MARKETING -->
+  <div class="card">
+    <div class="card-head"><div class="card-title"><span class="card-icon">📣</span>Kos Pemasaran</div></div>
+    ${mktMajKeys.map(k=>{
+      const item=S.mkt[k];
+      const mktAmt = item.on ? (item.type==='pct' ? S.price*(item.v/100) : item.v) : 0;
+      return `
+      <div class="toggle-row ${item.on?'on':''}">
+        <button class="tog ${item.on?'on':''}" onclick="toggleMkt('${k}')"></button>
+        <span class="toggle-label">${item.label}</span>
+        ${item.on?`
+          <div class="mkt-inputs">
+            <div class="seg">
+              <button class="${item.type==='pct'?'on':''}" onclick="setMktType('${k}','pct')">%</button>
+              <button class="${item.type==='fix'?'on':''}" onclick="setMktType('${k}','fix')">RM</button>
+            </div>
+            <input class="mono" type="number" min="0" step="0.1" value="${item.v}" style="width:72px" oninput="setMktVal('${k}',+this.value)"/>
+            <span class="mkt-preview">${item.type==='pct'?rm(mktAmt):'fixed'}</span>
+          </div>
+        `:''}
+      </div>`;
+    }).join('')}
+    ${C.mktTotal>0?`<div class="total-bar orange"><span class="total-bar-label">Jumlah Kos Pemasaran</span><span class="total-bar-val">${rm(C.mktTotal)}</span></div>`:''}
+  </div>
+
+  <!-- HARGA JUAL -->
+  <div class="card">
+    <div class="card-head"><div class="card-title"><span class="card-icon">🏷️</span>Harga Jual</div></div>
+    <div class="fg" style="margin-bottom:13px">
+      <label>Masukkan Harga Jual (RM)</label>
+      <div style="display:flex;align-items:center;gap:9px">
+        <span style="font-family:ui-monospace;font-size:17px;font-weight:700;color:var(--text-3)">RM</span>
+        <input class="mono" type="number" min="0" step="0.10" value="${S.price}" oninput="S.price=+this.value||0;live()" onchange="render()" style="font-size:22px;font-weight:800;padding:9px 13px"/>
+      </div>
+    </div>
+    <div class="price-pills">
+      <div class="pill breakeven"><div class="pill-label">Titik Pulang Modal</div><div class="pill-val" data-k="breakEven">${rm(C.breakEven)}</div></div>
+      <div class="pill recommend"><div class="pill-label">⭐ Disyorkan</div><div class="pill-val" data-k="recommended">${rm(C.recommended)}</div></div>
+      <div class="pill premium"><div class="pill-label">Premium</div><div class="pill-val" data-k="premium">${rm(C.premium)}</div></div>
+    </div>
+  </div>
+
+  <!-- KEPUTUSAN -->
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <div class="card-title"><span class="card-icon">📊</span>Keputusan Pengiraan</div>
+        <div class="card-sub">Analisis untung berkuasa AI</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="runAI()" ${S.aiLoading?'disabled':''}>
+        ${S.aiLoading?'<span class="spinner"></span> Menganalisis...':'✨ Penasihat AI'}
+      </button>
+    </div>
+    <div class="result-grid" style="margin-bottom:13px">
+      ${[
+        {k:'netProfit',label:'Untung Bersih',val:rm(C.netProfit),cls:profitColor(C.netProfit)},
+        {k:'margin',label:'Margin Untung',val:pct(C.margin),cls:marginColor(C.margin)},
+        {k:'roi',label:'ROI',val:pct(C.roi),cls:roiColor(C.roi)},
+        {k:'sellerPayout',label:'Bayaran Penjual',val:rm(C.sellerPayout),cls:'primary'},
+        {k:'feesTotal',label:'Fee Marketplace',val:rm(C.fees.total),cls:'red'},
+        {k:'totalCost',label:'Jumlah Kos',val:rm(C.totalCost),cls:''},
+      ].map(r=>`<div class="result-item"><div class="result-label">${r.label}</div><div class="result-val ${r.cls}" data-k="${r.k}">${r.val}</div></div>`).join('')}
+    </div>
+    <div class="grid2">
+      <div class="fee-box">
+        <div class="fee-box-title">Perincian Fee Marketplace</div>
+        <div class="fee-row"><span class="fee-key">Komisyen (${rule.c}%)</span><span class="fee-val">${rm(C.fees.c)}</span></div>
+        <div class="fee-row"><span class="fee-key">Transaksi (${rule.t}%)</span><span class="fee-val">${rm(C.fees.t)}</span></div>
+        <div class="fee-row"><span class="fee-key">Fee Program (${rule.p}%)</span><span class="fee-val">${rm(C.fees.pl)}</span></div>
+        <div class="fee-row"><span class="fee-key">Fee Tetap / Pesanan</span><span class="fee-val">${rm(C.fees.flat)}</span></div>
+        <div class="fee-total-row"><span class="fee-total-key">Jumlah Fee</span><span class="fee-total-val">${rm(C.fees.total)}</span></div>
+      </div>
+      <div class="fee-box">
+        <div class="fee-box-title">Pecahan Kos Penuh</div>
+        <div class="fee-row"><span class="fee-key">Kos Produk</span><span class="fee-val">${rm(C.productCost)}</span></div>
+        <div class="fee-row"><span class="fee-key">Fee Marketplace</span><span class="fee-val">${rm(C.fees.total)}</span></div>
+        <div class="fee-row"><span class="fee-key">Pemasaran</span><span class="fee-val">${rm(C.mktTotal)}</span></div>
+        <div class="fee-total-row"><span class="fee-total-key">Jumlah Kos</span><span class="fee-total-val">${rm(C.totalCost)}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI ADVICE -->
+  ${S.aiAdvice ? `
+  <div class="ai-box">
+    <div class="ai-head">
+      <div class="ai-dot"></div>
+      <span class="ai-badge">PENASIHAT AI</span>
+      <span class="ai-rating" style="color:${{Excellent:'var(--green)',Good:'var(--green)',Fair:'var(--orange)',Poor:'var(--red)',Rugi:'var(--red)'}[S.aiAdvice.rating]||'var(--orange)'}">${S.aiAdvice.rating}</span>
+    </div>
+    <div class="ai-summary">${e(S.aiAdvice.summary)}</div>
+    ${S.aiAdvice.warning?`<div class="alert warn" style="margin-bottom:9px">⚠️ ${e(S.aiAdvice.warning)}</div>`:''}
+    ${S.aiAdvice.tips.map(t=>`<div class="ai-tip"><span>→</span><span>${e(t)}</span></div>`).join('')}
+    ${S.aiAdvice.rec>0?`
+      <div class="ai-rec">
+        <span class="ai-rec-label">Harga Disyorkan AI:</span>
+        <span class="ai-rec-price">${rm(S.aiAdvice.rec)}</span>
+        <button class="btn btn-primary btn-sm" onclick="S.price=${S.aiAdvice.rec.toFixed(2)};render()">Guna</button>
+      </div>
+    `:''}
+  </div>
+  ` : ''}
+
+  <!-- SIMULATOR -->
+  <div class="card">
+    <div class="card-head"><div class="card-title"><span class="card-icon">🎚️</span>Simulator Harga</div></div>
+    <div class="sim-display">
+      <div class="sim-price" id="sim-price">${rm(S.price)}</div>
+      <div class="sim-note">Harga Jual Simulasi</div>
+    </div>
+    <input type="range" id="sim-slider" min="${minS.toFixed(2)}" max="${maxS.toFixed(2)}" step="0.10" value="${S.price}"
+      style="background:linear-gradient(to right,var(--accent) ${sliderPct.toFixed(1)}%,var(--border) ${sliderPct.toFixed(1)}%)"
+      oninput="onSlider(this)" onchange="render()"/>
+    <div class="slider-labels"><span class="slider-label">${rm(minS)}</span><span class="slider-label">${rm(maxS)}</span></div>
+    <div class="result-grid" style="margin-top:14px">
+      ${[
+        {k:'netProfit',label:'Untung Bersih',val:rm(C.netProfit),cls:profitColor(C.netProfit)},
+        {k:'margin',label:'Margin',val:pct(C.margin),cls:marginColor(C.margin)},
+        {k:'roi',label:'ROI',val:pct(C.roi),cls:roiColor(C.roi)},
+        {k:'feesTotal',label:'Fee MP',val:rm(C.fees.total),cls:'red'},
+        {k:'sellerPayout',label:'Bayaran Penjual',val:rm(C.sellerPayout),cls:'primary'},
+        {k:'totalCost',label:'Jumlah Kos',val:rm(C.totalCost),cls:''},
+      ].map(r=>`<div class="result-item"><div class="result-label">${r.label}</div><div class="result-val ${r.cls}" data-k="${r.k}">${r.val}</div></div>`).join('')}
+    </div>
+  </div>
+
+  <!-- SENARIO -->
+  <div class="card">
+    <div class="card-head"><div class="card-title"><span class="card-icon">⚡</span>Perbandingan Senario</div></div>
+    <div class="scenario-grid">
+      ${scenarios.map(s=>`
+        <div class="scenario-card">
+          <div class="scenario-eyebrow">Senario ${s.label}</div>
+          <div class="scenario-name">${s.name}</div>
+          <hr class="divider">
+          <div class="sc-row"><span class="sc-key">Untung Bersih</span><span class="sc-val ${s.r.netProfit>=0?'g':'r'}">${rm(s.r.netProfit)}</span></div>
+          <div class="sc-row"><span class="sc-key">Margin</span><span class="sc-val" style="color:${s.r.margin>=15?'var(--green)':'var(--orange)'}">${pct(s.r.margin)}</span></div>
+          <div class="sc-row"><span class="sc-key">ROI</span><span class="sc-val" style="color:${s.r.roi>=20?'var(--green)':'var(--orange)'}">${pct(s.r.roi)}</span></div>
+          <div class="sc-row"><span class="sc-key">Fee MP</span><span class="sc-val r">${rm(s.r.fees.total)}</span></div>
+          <div class="sc-row"><span class="sc-key">Pemasaran</span><span class="sc-val r">${rm(s.r.mktTotal)}</span></div>
+        </div>
+      `).join('')}
+    </div>
+  </div>
+
+  <!-- SIMPAN / RESET -->
+  <div style="display:flex;gap:9px;margin-bottom:32px">
+    <button class="btn btn-primary" onclick="saveProduct()">💾 Simpan Produk</button>
+    <button class="btn btn-outline" onclick="resetCalc()">🔄 Reset</button>
+  </div>
+  `;
+}
+
+function savedList() {
+  const filtered = S.saved.filter(p=>p.name.toLowerCase().includes(S.search.toLowerCase())||p.sku.toLowerCase().includes(S.search.toLowerCase()));
+  return `${filtered.length===0
+      ?`<div class="empty"><div class="empty-icon">📦</div><div class="empty-title">Tiada produk ditemui</div><div class="empty-sub">Cuba carian lain atau buat produk baru</div></div>`
+      :`<table class="tbl">
+        <thead><tr><th>Produk</th><th>Platform</th><th>Harga</th><th>Margin</th><th>Untung</th><th></th></tr></thead>
+        <tbody>
+          ${filtered.map(p=>`
+            <tr>
+              <td><div style="font-weight:700;color:var(--text)">${e(p.name)}</div><div style="font-size:10px;color:var(--text-4)">${e(p.sku)}</div></td>
+              <td><span class="badge badge-${p.platform}">${p.platform==='shopee'?'🛍️ Shopee':'🎵 TikTok'}</span></td>
+              <td style="font-family:ui-monospace;font-weight:700;font-variant-numeric:tabular-nums">${rm(p.price)}</td>
+              <td style="font-family:ui-monospace;font-weight:700;color:${p.margin>20?'var(--green)':p.margin>10?'var(--orange)':'var(--red)'};">${pct(p.margin)}</td>
+              <td style="font-family:ui-monospace;font-weight:700;color:${p.profit>0?'var(--green)':'var(--red)'};">${rm(p.profit)}</td>
+              <td><button class="btn btn-danger btn-sm" onclick="deleteSaved(${p.id})">Padam</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>`}`;
+}
+
+function viewSaved() {
+  return `
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title"><span class="card-icon">📦</span>Produk Tersimpan</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" type="text" placeholder="Cari produk..." value="${e(S.search)}" oninput="S.search=this.value;renderSavedList()"/>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="go('calculator')">+ Baru</button>
+      </div>
+    </div>
+    <div id="saved-list">${savedList()}</div>
+  </div>`;
+}
+
+window.renderSavedList = () => {
+  const el = document.getElementById('saved-list');
+  if(el) el.innerHTML = savedList();
+};
+
+function viewMonitor() {
+  const sources = [
+    {status:'ok',source:'Shopee Seller Education Hub',url:'seller.shopee.com.my/edu',check:'2 jam lalu',conf:98},
+    {status:'ok',source:'Shopee Official Announcement',url:'seller.shopee.com.my',check:'2 jam lalu',conf:97},
+    {status:'chg',source:'TikTok Shop Academy MY',url:'seller-my.tiktok.com/academy',check:'45 min lalu',conf:91,change:'Struktur komisyen affiliate baru dikesan'},
+    {status:'ok',source:'TikTok Seller Centre MY',url:'seller-my.tiktok.com',check:'1 jam lalu',conf:95},
+  ];
+  return `
+  <div class="alert warn">⚠️ Pemantauan fee mengimbas sumber rasmi sahaja. Kelulusan admin diperlukan sebelum kemas kini database.</div>
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title"><span class="card-icon">📡</span>Sumber Pemantauan</div>
+      <button class="btn btn-primary btn-sm">🔄 Imbas Sekarang</button>
+    </div>
+    ${sources.map(m=>`
+      <div class="monitor-item">
+        <div class="mon-dot ${m.status}"></div>
+        <div style="flex:1">
+          <div class="mon-source">${m.source}</div>
+          <div class="mon-detail">${m.url} · Disemak ${m.check}</div>
+          ${m.change?`<div class="mon-change">⚡ ${m.change}</div>`:''}
+          <div class="conf-bar">
+            <span style="font-size:10px;color:var(--text-4);font-weight:600">Keyakinan</span>
+            <div class="conf-track"><div class="conf-fill" style="width:${m.conf}%"></div></div>
+            <span class="conf-label">${m.conf}%</span>
+          </div>
+        </div>
+        <span class="badge ${m.status==='ok'?'badge-ok':'badge-warn'}">${m.status==='ok'?'✓ Terkini':'⚡ Perubahan'}</span>
+      </div>
+    `).join('')}
+  </div>
+  <div class="card">
+    <div class="card-head"><div class="card-title"><span class="card-icon">📋</span>Laporan Perubahan — Menunggu Kelulusan</div></div>
+    <div style="background:var(--orange-bg);border:1px solid var(--orange-border);border-radius:var(--radius-sm);padding:16px">
+      <div style="font-size:12px;font-weight:700;color:var(--orange);margin-bottom:12px">⚡ Perubahan Fee Berpotensi Dikesan</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
+        ${[{l:'Platform',v:'Shopee Malaysia'},{l:'Kategori',v:'Semua Kategori'},{l:'Berkuat Kuasa',v:'2026-02-01'},{l:'Keyakinan',v:'91%'}].map(f=>`
+          <div><div style="font-size:9px;color:var(--text-3);font-weight:700;text-transform:uppercase;margin-bottom:3px">${f.l}</div><div style="font-size:13px;font-weight:700;color:var(--text)">${f.v}</div></div>
+        `).join('')}
+      </div>
+      <div class="grid2" style="margin-bottom:12px">
+        <div style="background:var(--accent-bg);border:1px solid var(--accent-border);border-radius:var(--radius-sm);padding:12px;text-align:center">
+          <div style="font-size:9px;color:var(--red);font-weight:700;text-transform:uppercase;margin-bottom:4px">Fee Lama</div>
+          <div style="font-size:26px;font-weight:800;color:var(--red);font-family:ui-monospace;font-variant-numeric:tabular-nums">8.64%</div>
+          <div style="font-size:11px;color:var(--text-3)">Komisyen</div>
+        </div>
+        <div style="background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--radius-sm);padding:12px;text-align:center">
+          <div style="font-size:9px;color:var(--green);font-weight:700;text-transform:uppercase;margin-bottom:4px">Fee Baru</div>
+          <div style="font-size:26px;font-weight:800;color:var(--green);font-family:ui-monospace;font-variant-numeric:tabular-nums">10.26%</div>
+          <div style="font-size:11px;color:var(--text-3)">Komisyen</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:7px">
+        <button class="btn btn-sm" style="background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)">✓ Luluskan & Kemas Kini</button>
+        <button class="btn btn-danger btn-sm">✗ Tolak</button>
+        <button class="btn btn-outline btn-sm">🔗 Sahkan Sumber</button>
+      </div>
+      <div style="margin-top:7px;font-size:10px;color:var(--text-3)">⚠️ Database TIDAK akan dikemas kini sehingga admin meluluskan.</div>
+    </div>
+  </div>`;
+}
+
+function viewAdmin() {
+  const db = S.feeDb[S.adminTab];
+  return `
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title"><span class="card-icon">⚙</span>Enjin Fee — Database Langsung</div>
+      <button class="btn btn-primary btn-sm">💾 Simpan Semua</button>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn ${S.adminTab==='shopee'?'on':''}" onclick="S.adminTab='shopee';render()">🛍️ Shopee Malaysia</button>
+      <button class="tab-btn ${S.adminTab==='tiktok'?'on':''}" onclick="S.adminTab='tiktok';render()">🎵 TikTok Shop Malaysia</button>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>Kategori</th><th>Komisyen %</th><th>Transaksi %</th><th>Program %</th><th>Tetap RM</th><th>Jumlah</th><th>Status</th></tr></thead>
+      <tbody>
+        ${Object.entries(db.categories).map(([cat,rule])=>`
+          <tr>
+            <td style="font-weight:700;color:var(--text)">${cat}</td>
+            ${['c','t','p','flat'].map(f=>`
+              <td><input class="admin-input" type="number" min="0" step="0.01" value="${rule[f]}" oninput="updateFee('${S.adminTab}','${cat}','${f}',+this.value)"/></td>
+            `).join('')}
+            <td style="font-family:ui-monospace;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums">${(rule.c+rule.t+rule.p).toFixed(2)}% + RM${(+rule.flat||0).toFixed(2)}</td>
+            <td><span class="badge badge-ok">✓ Disahkan</span></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+// ─── ESCAPE ─────────────────────────────────────────────────
+function e(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── ACTIONS ────────────────────────────────────────────────
+window.go = v => { S.view = v; S.aiAdvice = null; render(); };
+window.addCost = () => { S.costs.push({id:S.nextId++,label:'Item Kos',amount:''}); renderCosts(); live(); };
+window.delCost = id => { S.costs = S.costs.filter(c=>c.id!==id); renderCosts(); live(); };
+window.updateCostLabel = (id, v) => { const c = S.costs.find(c=>c.id===id); if(c) c.label=v; };
+window.updateCostAmt = (id, v) => { const c = S.costs.find(c=>c.id===id); if(c){c.amount=v; live(); } };
+window.toggleMkt = k => { S.mkt[k].on = !S.mkt[k].on; render(); };
+window.setMktType = (k, t) => { S.mkt[k].type = t; render(); };
+window.setMktVal = (k, v) => { S.mkt[k].v = v; live(); };
+window.onSlider = el => {
+  S.price = +el.value;
+  const min = +el.min, max = +el.max;
+  const p = Math.min(100, Math.max(0, ((S.price - min) / (max - min)) * 100));
+  el.style.background = `linear-gradient(to right,var(--accent) ${p.toFixed(1)}%,var(--border) ${p.toFixed(1)}%)`;
+  const sp = document.getElementById('sim-price');
+  if (sp) sp.textContent = rm(S.price);
+  live();
+};
+window.updateFee = (plat, cat, field, val) => { S.feeDb[plat].categories[cat][field] = val; };
+window.deleteSaved = id => { S.saved = S.saved.filter(p=>p.id!==id); render(); };
+window.saveProduct = () => {
+  if(!S.productName){ alert('Sila masukkan nama produk terlebih dahulu.'); return; }
+  const C = compute(S);
+  S.saved.unshift({id:S.nextId++,name:S.productName,sku:S.sku||'-',platform:S.platform,category:S.category,margin:C.margin,profit:C.netProfit,price:S.price});
+  go('saved');
+};
+window.resetCalc = () => {
+  S.productName=''; S.sku=''; S.price=35.90;
+  S.costs = [{id:1,label:'Kos Produk',amount:''},{id:2,label:'Pembungkusan',amount:''},{id:3,label:'Bubble Wrap',amount:''},{id:4,label:'Kotak',amount:''},{id:5,label:'Stiker',amount:''},{id:6,label:'Buruh',amount:''},{id:7,label:'Yuran Pengurusan',amount:''},{id:8,label:'Bahan Penghantaran',amount:''},{id:9,label:'Kos Shipping (Pos/Kurier)',amount:''},{id:10,label:'Hadiah Percuma',amount:''},{id:11,label:'Lain-lain',amount:''}];
+  Object.values(S.mkt).forEach(m=>{m.on=false;});
+  S.aiAdvice = null;
+  render();
+};
+window.runAI = async () => {
+  S.aiLoading = true; render();
+  await new Promise(r=>setTimeout(r,1200));
+  const C = compute(S);
+  const m = C.margin;
+  let rating = m>25?'Excellent':m>15?'Good':m>5?'Fair':m>0?'Poor':'Rugi';
+  let tips = [];
+  if(m<15) tips.push(`Margin ${pct(m)} di bawah 15% — pertimbangkan naikkan harga atau kurangkan kos pembungkusan.`);
+  if(S.mkt.affiliate.on && S.mkt.affiliate.v>10) tips.push(`Komisyen affiliate ${S.mkt.affiliate.v}% agak tinggi — cuba kurangkan ke 8-10%.`);
+  if(C.fees.total > S.price*0.1) tips.push('Fee marketplace melebihi 10% harga jual — pertimbangkan kategori atau platform yang lebih rendah fee.');
+  if(!tips.length) tips.push(`Margin ${pct(m)} — dalam julat yang baik untuk marketplace Malaysia.`);
+  tips.push('Bandingkan harga pesaing di platform yang sama sebelum tetapkan harga akhir.');
+  if(tips.length<3) tips.push('Aktifkan GMV Max semasa kempen untuk tingkatkan visibility tanpa kos tetap.');
+  S.aiAdvice = {
+    summary: m>15 ? `Produk ini mempunyai margin ${pct(m)} — keuntungan yang sihat untuk ${S.platform==='shopee'?'Shopee':'TikTok Shop'} MY.` : `Margin ${pct(m)} agak rendah — ada ruang penambahbaikan sebelum listing.`,
+    rating, tips: tips.slice(0,3),
+    rec: C.recommended,
+    warning: m<=0 ? 'RUGI — harga jual lebih rendah daripada jumlah kos. Naikkan harga segera.' : null
+  };
+  S.aiLoading = false;
+  render();
+};
+
+// ─── SMART PARTIAL UPDATES ──────────────────────────────────
+function renderCosts() {
+  const el = document.getElementById('cost-list');
+  if(!el) return render();
+  el.innerHTML = S.costs.map(c=>`
+    <div class="cost-row">
+      <input type="text" value="${e(c.label)}" oninput="updateCostLabel(${c.id},this.value)"/>
+      <span class="cost-pfx">RM</span>
+      <input class="mono" type="number" min="0" step="0.01" value="${c.amount}" placeholder="0.00" oninput="updateCostAmt(${c.id},this.value)"/>
+      <button class="del-btn" onclick="delCost(${c.id})">×</button>
+    </div>
+  `).join('');
+}
+
+function live() {
+  if(S.view !== 'calculator') return;
+  const C = compute(S);
+  const vals = {
+    netProfit: rm(C.netProfit), margin: pct(C.margin), roi: pct(C.roi),
+    sellerPayout: rm(C.sellerPayout), feesTotal: rm(C.fees.total), totalCost: rm(C.totalCost),
+    breakEven: rm(C.breakEven), recommended: rm(C.recommended), premium: rm(C.premium),
+  };
+  const cls = {
+    netProfit: profitColor(C.netProfit), margin: marginColor(C.margin), roi: roiColor(C.roi),
+    sellerPayout: 'primary', feesTotal: 'red', totalCost: '',
+  };
+  document.querySelectorAll('[data-k]').forEach(el => {
+    const k = el.dataset.k;
+    if(vals[k] !== undefined) el.textContent = vals[k];
+    if(el.classList.contains('result-val') && cls[k] !== undefined) el.className = ('result-val ' + cls[k]).trim();
+  });
+  const bars = document.querySelectorAll('.total-bar-val');
+  if(bars[0]) bars[0].textContent = rm(C.productCost);
+  if(bars[1]) bars[1].textContent = rm(C.mktTotal);
+}
+
+// ─── THEME ──────────────────────────────────────────────────
+let currentTheme = window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  const btn = document.getElementById('theme-btn');
+  if(btn) btn.textContent = t==='dark' ? '☀️' : '🌙';
+  currentTheme = t;
+}
+document.getElementById('theme-btn').addEventListener('click', () => applyTheme(currentTheme==='dark'?'light':'dark'));
+applyTheme(currentTheme);
+
+// ─── RENDER ─────────────────────────────────────────────────
+function render() {
+  document.getElementById('page-label').textContent = PAGE_TITLE[S.view] || '';
+  renderNav();
+  const content = document.getElementById('content');
+  const views = {dashboard:viewDashboard,calculator:viewCalculator,saved:viewSaved,monitor:viewMonitor,admin:viewAdmin};
+  content.innerHTML = (views[S.view]||viewCalculator)();
+}
+
+render();
+</script>
