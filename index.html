@@ -373,6 +373,20 @@ input[type=file]::file-selector-button{background:var(--grad);color:#fff;border:
   .admin-input{width:88px;font-size:15px}
 }
 .divider{border:none;border-top:1px solid var(--border-light);margin:12px 0}
+
+/* ─── LOCK SCREEN ─── */
+.lock{position:fixed;inset:0;z-index:100;background:var(--wash),var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
+.lock-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow-md);padding:34px 30px;width:100%;max-width:380px;text-align:center}
+.lock-logo{width:56px;height:56px;border-radius:16px;background:var(--grad);box-shadow:var(--glow);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;color:#fff;font-size:24px;font-weight:800}
+.lock-title{font-size:19px;font-weight:800;color:var(--text)}
+.lock-sub{font-size:12px;color:var(--text-3);margin:5px 0 20px;line-height:1.6}
+.lock input{text-align:center;font-family:ui-monospace,monospace;font-size:15px!important;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+.lock .btn{width:100%;justify-content:center;padding:11px}
+.lock-err{display:none;font-size:11px;color:var(--red);font-weight:600;margin-top:10px}
+.lock-note{font-size:11px;color:var(--text-4);margin-top:18px;padding-top:14px;border-top:1px solid var(--border-light);line-height:1.7}
+.lock-note a{color:var(--accent);font-weight:700;text-decoration:none}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.lock-card.no{animation:shake .3s}
 </style>
 
 <div class="shell">
@@ -406,6 +420,18 @@ input[type=file]::file-selector-button{background:var(--grad);color:#fff;border:
 </div>
 
 <nav class="bottom-nav" id="bottom-nav" aria-label="Navigasi utama"></nav>
+
+<div class="lock" id="lock">
+  <div class="lock-card" id="lock-card">
+    <div class="lock-logo">P</div>
+    <div class="lock-title">ProfitCalc</div>
+    <div class="lock-sub">Alat kira untung untuk penjual Shopee &amp; TikTok Shop Malaysia.<br>Masukkan kod akses anda untuk mula.</div>
+    <input id="lic-in" type="text" placeholder="UNTUNG-XXXX-XXXX" autocomplete="off" spellcheck="false"/>
+    <button class="btn btn-primary" onclick="licSubmit()">🔓 Buka Akses</button>
+    <div class="lock-err" id="lic-err">Kod tidak sah. Semak semula ejaan kod anda.</div>
+    <div class="lock-note">Belum ada kod akses?<br><a href="https://wa.me/60123456789?text=Nak%20beli%20kod%20akses%20ProfitCalc" target="_blank" rel="noopener">Beli akses di sini →</a></div>
+  </div>
+</div>
 
 <script>
 // ─── FEE DATABASE ───────────────────────────────────────────
@@ -1466,6 +1492,79 @@ function render() {
   const views = {dashboard:viewDashboard,calculator:viewCalculator,reverse:viewReverse,audit:viewAudit,saved:viewSaved,monitor:viewMonitor,admin:viewAdmin};
   content.innerHTML = (views[S.view]||viewCalculator)();
 }
+
+
+// ─── KOD AKSES (LESEN) ──────────────────────────────────────
+// SHA-256 tulen JS (untuk gate kod akses — sync, tiada dependency)
+function sha256hex(str) {
+  const K = [0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+    0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+    0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+    0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+    0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+    0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+    0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+    0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  let H = [0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  const bytes = [];
+  for (let i=0;i<str.length;i++){
+    let c=str.charCodeAt(i);
+    if(c<128)bytes.push(c);
+    else if(c<2048){bytes.push(192|c>>6,128|c&63);}
+    else if(c<0xd800||c>=0xe000){bytes.push(224|c>>12,128|c>>6&63,128|c&63);}
+    else{c=0x10000+((c&1023)<<10)+(str.charCodeAt(++i)&1023);bytes.push(240|c>>18,128|c>>12&63,128|c>>6&63,128|c&63);}
+  }
+  const len=bytes.length; bytes.push(0x80);
+  while(bytes.length%64!==56)bytes.push(0);
+  const hi=Math.floor(len*8/4294967296), lo=(len*8)>>>0;
+  bytes.push(hi>>>24&255,hi>>>16&255,hi>>>8&255,hi&255,lo>>>24&255,lo>>>16&255,lo>>>8&255,lo&255);
+  const rr=(x,n)=>(x>>>n)|(x<<(32-n));
+  const w=new Array(64);
+  for(let i=0;i<bytes.length;i+=64){
+    for(let t=0;t<16;t++)w[t]=(bytes[i+t*4]<<24)|(bytes[i+t*4+1]<<16)|(bytes[i+t*4+2]<<8)|bytes[i+t*4+3];
+    for(let t=16;t<64;t++){
+      const s0=rr(w[t-15],7)^rr(w[t-15],18)^(w[t-15]>>>3);
+      const s1=rr(w[t-2],17)^rr(w[t-2],19)^(w[t-2]>>>10);
+      w[t]=(w[t-16]+s0+w[t-7]+s1)>>>0;
+    }
+    let[a,b,c,d,e2,f,g,h]=H;
+    for(let t=0;t<64;t++){
+      const S1=rr(e2,6)^rr(e2,11)^rr(e2,25);
+      const ch=(e2&f)^(~e2&g);
+      const t1=(h+S1+ch+K[t]+w[t])>>>0;
+      const S0=rr(a,2)^rr(a,13)^rr(a,22);
+      const mj=(a&b)^(a&c)^(b&c);
+      const t2=(S0+mj)>>>0;
+      h=g;g=f;f=e2;e2=(d+t1)>>>0;d=c;c=b;b=a;a=(t1+t2)>>>0;
+    }
+    H=[(H[0]+a)>>>0,(H[1]+b)>>>0,(H[2]+c)>>>0,(H[3]+d)>>>0,(H[4]+e2)>>>0,(H[5]+f)>>>0,(H[6]+g)>>>0,(H[7]+h)>>>0];
+  }
+  return H.map(x=>x.toString(16).padStart(8,'0')).join('');
+}
+
+const LIC_SALT = 'dynopro.my|profitcalc|v1|';
+const LIC_HASHES = ["73d1838fa12c639572dcfde0ba5afce123f5f00c165e3fc6c2ec858b7efe2d3b","8ed19beb4f0c659d800fbfefe77971170411c3f1ccde1d508559d8993feaac89","474d355ddf4a43af42c5d2d23ebc76f89115965f62610073aa805f8ffef9f2aa","834285dd6febacc7490fc9d9de1da994ea410bffce93616e6cb12b5d801e1b58","8b55b5c956d5f190e4fafe37ff3e9ad5d1c81449654d3ee0c9f302a93e894367","aedd792ae90eecbe5cb21642c848633da5e9bc968ece1d766a70bdf75dd74aae","f8b48eb110944445d677a1654c59eab747639042abbeb4349eddf3f34c3085d7","e37026687c3a1234077be1cacd5a2f4ddb8845eab6e6eacb85ac5a24738ed372","b8d236030d0b1d629203fbca9a460928fa12cbd92812f3a98e2ce71a4470b095","59d545067ec806ae7c99b9d2f62a9018eb9bf7c3df71bd119e87e3998315a090","8def84d2a66e95b320da308c8690ca71e5f826853d58dc43e41b215306c08ada","02f09da01338fab58ab37b6b07300ff01300845ac1b16ff8780b8d531cc19a7d","8d39bcf84ae3849a2c0961cb9776decd7ae0a0d91689d92b4502614788c7c2d5","b7fb0b2b4e89f67aa3ca64b71463cc1b9f1ae9c81d977d22ab8e38b1cfbb4753","a4a4228b2b21de4e750a8b5148045bf56f2d136d56a2b502ff94a47ad864d742","4b6a400c00a80e9424c5d59656ba1fda2a130283d21004b995f2d2693d9b804e","ed0cee79fa91f67c3b6f51526757b57fe137a9d8af4a891c1b9505f481730941","0053e904677e05eb239da20de0568ffb87eca586a6c613b76643435852f5e74b","4b1d75dd85c5486bc0993c524b5ac8d1f4421be5e9dd00c7dc0c90396ee80598","0afdc0eea3c8326529bf1b0fd569c4c0f8fe32d175835a46debbba34dbee01ec","bc8820e5902cca0dccd1ddc301dff4354822db2e9a8650258c8131283cd424b9","007c53e700bfc4f70fad64f9ae5229f98510dd9702d20744ddbaa917f5c5754b","6ef1fd3ad8edc4ed0233f30429e30e2b5b07139c0ea767208f7c80f8eb05f9c1","24b13f17343bb40063b21c35b520d2df490544adf3a132faaf2b0c82979a2e01","90b3e6b4a9434e93f7f10428c1507924f861525d52ff007f274a39ed86107d03","fe614e1cc91ee6e106c49656264f61d59c6d709cc6a6eabcc9f6b20a3ca2a20a","5b223bda7ec154bcd346952c840bf9e31f0b2201304c3f8e561b32ab3c8bb22a","bc86829e40566b9b6900f596503b8d1e8a99fc00c915df74379bb9042906925a","50f58dd5e3d0074669ec0d0a42df834e055fa535f0b511a4f0bd7b2817e27668","74a76a2477dd909cd17bf0a5a7f12a4d7190275f342de3d98c090d92760e8edc","5fc142b185c8657d0884f3f504dfab3b8e72ee803603c2f96ce08ffad30e98b8","59951fa7ef807ed91e34e23a52f817f1db70391570286dddcd27e644c9c00f43","916f654552898a1bfb7e7caff337457136c21ba54fc4f4c34e0237ec7546b912","083d3ff0db84197bbf8c170689ffde3811ee33d217d11591a4e07e995af34a3d","8829d444ae1ded23bfef7b6e5c5f9a2f77bdf3ab9eb0e7e605fd92a2c24e2ca5","59c8179205a926a4cd444d309c36ac0c5327c46033333c10df38917fe815e5f5","a32fba82afd10000ccacdf989a8db955f7403f8de429719855899acee1d994f0","a1aa502ec07fe15f5ec7ef7dd3081bc3e2ab0a51babcaca217241b7ff44fc6db","600f6a7ee743dee970c376ea8ccf67a46d85551016248d8981a4aec59c5f246b","b4fc7f2c651711119af389de4d86ea6a293908718637e7a387d188c068e129ea","cce5598de1a1252f7249a6de11e2c4604a3854acff329076932a76061252a4b2","ab3cb7d67bd96051d9ae76fcd5be2a5e6f63d7d16006d284f191b625c697f05f","0ab102f819a30c32bab8dfe6e47e18427c6f7ff5e9521f40c28c7dcf0e39c2fd","5958dd0b0ab40cf2619218e3b2fad126b9e4d83416e47a2fad637fc9f2d687e4","9fd6283e4a1a835460291d44051220a1b447a110bd1588486cd0aca69f4f1959","a7bf1574f3fe77ef5e51c9fcf692ec9179fb61b09646f348325dee8380390734","8a25f7db4ba4b5add9a5522bac0b02fe782de8586ec50563a1faa6dbc00e7a75","7ba3d320106ab38376f422133f61d1ef777b182c213d825735da0059bd383511","ff05235bf930942551326ade9ec1b054f1dbd89afcafcd41dfb29a285157851f","af0348d5e35d1a4a21c0e62531d2d03b17464b8238c07456e1a9aa1cb4c213b9"];
+const LIC_KEY = 'pc_lic_v1';
+const licNorm = c => String(c||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+const licValid = c => LIC_HASHES.includes(sha256hex(LIC_SALT + licNorm(c)));
+function licBoot() {
+  let ok = false;
+  try { ok = licValid(localStorage.getItem(LIC_KEY)||''); } catch(e) {}
+  if (ok) document.getElementById('lock').style.display = 'none';
+}
+window.licSubmit = () => {
+  const v = document.getElementById('lic-in').value;
+  if (licValid(v)) {
+    try { localStorage.setItem(LIC_KEY, v); } catch(e) {}
+    document.getElementById('lock').style.display = 'none';
+  } else {
+    document.getElementById('lic-err').style.display = 'block';
+    const card = document.getElementById('lock-card');
+    card.classList.remove('no'); void card.offsetWidth; card.classList.add('no');
+  }
+};
+document.getElementById('lic-in').addEventListener('keydown', e => { if (e.key==='Enter') licSubmit(); });
+licBoot();
 
 render();
 
