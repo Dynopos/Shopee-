@@ -744,11 +744,21 @@ const CONFIG = {
   const form = document.getElementById('checkoutForm');
   const live = !!CONFIG.paymentUrl;
 
-  // Mod LANGSUNG: butang terus ke Bayarcash — borang kita dilangkau
-  // kerana Bayarcash sendiri mengutip nama, e-mel dan telefon pembeli.
+  // Mod LANGSUNG: tukar butang menjadi pautan sebenar ke Bayarcash.
+  // Guna <a> dan bukan JS redirect supaya ia berfungsi walaupun JS tersekat,
+  // boleh dibuka dalam tab baru, dan pembeli nampak destinasi bila ditekan lama.
   if (live) {
-    document.querySelectorAll('.checkout-trigger').forEach(b => {
-      b.addEventListener('click', () => { window.location.href = CONFIG.paymentUrl; });
+    document.querySelectorAll('.checkout-trigger').forEach(btn => {
+      const a = document.createElement('a');
+      a.href = CONFIG.paymentUrl;
+      a.rel = 'noopener';
+      a.className = btn.className;
+      a.style.cssText = btn.getAttribute('style') || '';
+      a.style.display = 'inline-flex';
+      a.style.alignItems = 'center';
+      a.style.justifyContent = 'center';
+      a.textContent = btn.textContent;
+      btn.replaceWith(a);
     });
     return;
   }
