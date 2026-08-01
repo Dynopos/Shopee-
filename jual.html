@@ -192,6 +192,15 @@ section{padding:clamp(52px,7vw,92px) 0}
 .price-list{display:flex;flex-direction:column;gap:10px;margin:22px 0;position:relative}
 .price-list .point{font-size:14.5px}
 .price-cta{width:100%;font-size:16.5px;padding:17px}
+
+/* GUARANTEE SEAL */
+.seal{display:flex;align-items:center;gap:14px;margin-top:16px;background:linear-gradient(135deg,rgba(34,197,94,.13),rgba(147,51,234,.05));border:1.5px solid rgba(34,197,94,.34);border-radius:var(--r);padding:16px 18px;position:relative}
+.seal-badge{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#22C55E,#059669);display:grid;place-items:center;flex-shrink:0;box-shadow:0 6px 20px rgba(34,197,94,.32);text-align:center;line-height:1.05}
+.seal-badge b{color:#fff;font-size:19px;font-weight:900;display:block}
+.seal-badge small{color:rgba(255,255,255,.9);font-size:8px;font-weight:800;letter-spacing:.08em;display:block}
+.seal-txt b{display:block;font-size:15px;font-weight:800;margin-bottom:3px;color:#BBF7D0}
+.seal-txt span{font-size:13px;color:var(--muted);line-height:1.55}
+.hero-seal{display:inline-flex;align-items:center;gap:8px;margin-top:14px;background:rgba(34,197,94,.11);border:1px solid rgba(34,197,94,.3);border-radius:999px;padding:8px 15px;font-size:13px;font-weight:700;color:#BBF7D0}
 .price-fine{font-size:12.5px;color:var(--dim);margin-top:13px;line-height:1.65;position:relative}
 .aside-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px}
 .aside-card h3{font-size:16px;margin-bottom:9px}
@@ -295,7 +304,7 @@ footer p{font-size:12.5px;color:var(--dim);line-height:1.7}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
 
-<div class="topbar">Harga pengenalan RM39 — untuk 37 seller terawal sahaja</div>
+<div class="topbar">Harga founder RM39 tamat 8 Ogos · Jaminan wang dikembalikan 7 hari</div>
 
 <nav class="nav">
   <div class="container nav-inner">
@@ -331,6 +340,7 @@ footer p{font-size:12.5px;color:var(--dim);line-height:1.7}
         <a class="btn-secondary" href="#marketplaces">Lihat cara DYNOPRO mengira</a>
       </div>
       <div class="microcopy">Sekali bayar RM39 · E-book + akses penuh DYNOPRO, tanpa had produk.</div>
+      <div class="hero-seal">🛡️ Jaminan wang dikembalikan dalam 7 hari</div>
 
       <div class="loss-box">
         <strong>Jualan masuk setiap hari, tetapi fee, voucher dan affiliate sedang makan margin tanpa disedari.</strong>
@@ -390,7 +400,7 @@ footer p{font-size:12.5px;color:var(--dim);line-height:1.7}
   <div class="container promo-inner">
     <div class="promo-left">
       <div class="promo-title">🔥 Harga pengenalan seller Shopee &amp; TikTok</div>
-      <div class="promo-sub">E-book + akses penuh DYNOPRO pada RM39 — selepas 37 slot penuh, harga kembali RM49.</div>
+      <div class="promo-sub">E-book + akses penuh DYNOPRO pada RM39 — tamat 8 Ogos atau bila 37 slot penuh, yang mana dahulu. Selepas itu RM49.</div>
       <div class="meter">
         <div class="meter-top"><span>Slot founder diambil</span><b><span id="slotsTaken">0</span> / <span id="slotsTotal">37</span></b></div>
         <div class="meter-track"><div class="meter-fill" id="meterFill" style="width:0%"></div></div>
@@ -560,6 +570,15 @@ footer p{font-size:12.5px;color:var(--dim);line-height:1.7}
           <div class="point"><span class="tick">✓</span><span>Report PDF untuk setiap produk</span></div>
         </div>
         <button class="btn-primary price-cta checkout-trigger">Ya, Saya Mahu Semak Untung Saya</button>
+
+        <div class="seal">
+          <div class="seal-badge"><b>7</b><small>HARI</small></div>
+          <div class="seal-txt">
+            <b>Jaminan wang dikembalikan</b>
+            <span>Rasa tak berbaloi dalam 7 hari? WhatsApp kami dan dapatkan bayaran balik penuh. Tiada soal, tiada syarat tersembunyi.</span>
+          </div>
+        </div>
+
         <div class="price-fine">Akses penuh tanpa had produk dan tanpa caj berulang. Harga RM39 terhad kepada 37 seller terawal sahaja — selepas itu RM49.</div>
       </div>
 
@@ -571,7 +590,7 @@ footer p{font-size:12.5px;color:var(--dim);line-height:1.7}
             <div class="g-ico">🔒</div>
             <div>
               <b>Sekali bayar, tiada langganan</b>
-              <span>Tiada caj bulanan, tiada auto-renew. Anda bayar sekali untuk pakej ini.</span>
+              <span>Tiada caj bulanan, tiada auto-renew, dan jaminan refund 7 hari kalau tak berbaloi.</span>
             </div>
           </div>
         </div>
@@ -609,6 +628,7 @@ footer p{font-size:12.5px;color:var(--dim);line-height:1.7}
     </div>
     <div class="faq-list">
       <details class="faq" open><summary>Adakah ini bayaran bulanan?</summary><div class="faq-body">Tidak. Ini pakej sekali bayar. Anda bayar sekali untuk E-book dan akses DYNOPRO. Tiada caj bulanan dan tiada auto-renew.</div></details>
+      <details class="faq"><summary>Macam mana kalau saya rasa tak berbaloi?</summary><div class="faq-body">Anda dapat bayaran balik penuh. WhatsApp kami dalam tempoh 7 hari selepas pembelian dan kami proses refund — tiada borang, tiada soal siasat. Risikonya pada kami, bukan anda.</div></details>
       <details class="faq"><summary>Apa sebenarnya saya dapat selepas bayar?</summary><div class="faq-body">Anda menerima E-book panduan 12 halaman dan kod akses DYNOPRO. Anda boleh terus mula mengira kos, fee marketplace, margin, ROI dan untung bersih sebaik sahaja akses diberi — tiada had bilangan produk.</div></details>
       <details class="faq"><summary>Ada had berapa produk?</summary><div class="faq-body">Tiada had. Anda boleh menyemak seberapa banyak produk yang anda mahu, dan Audit Pukal membolehkan anda memproses sehingga 100 produk sekali gus melalui fail CSV. E-book mencadangkan anda mulakan dengan 10 produk paling penting supaya audit pertama selesai cepat.</div></details>
       <details class="faq"><summary>Boleh guna untuk Shopee dan TikTok Shop?</summary><div class="faq-body">Ya. DYNOPRO menyokong kedua-dua Shopee Malaysia dan TikTok Shop Malaysia. Anda boleh menguji harga, kos dan senario pemasaran untuk kedua-dua platform.</div></details>
@@ -616,7 +636,7 @@ footer p{font-size:12.5px;color:var(--dim);line-height:1.7}
       <details class="faq"><summary>Adakah kadar fee sama untuk semua seller?</summary><div class="faq-body">Tidak semestinya. Kadar sebenar berbeza mengikut kategori, status seller (Mall, bukan Mall, seller baru) dan program yang disertai. Kadar dalam sistem ialah kadar umum Feb 2026 — anda boleh laraskan setiap kadar mengikut rate card akaun anda sendiri.</div></details>
       <details class="faq"><summary>Adakah ini benar-benar akses penuh?</summary><div class="faq-body">Ya. Semua ciri terbuka — kalkulator, reverse pricing, audit pukal CSV, report PDF dan panel kadar fee. Tiada versi terhad, tiada ciri yang dikunci di sebalik bayaran tambahan.</div></details>
       <details class="faq"><summary>Berapa cepat saya boleh mula guna?</summary><div class="faq-body">Sebaik sahaja akses diberi. Tiada pemasangan, tiada proses teknikal — buka pautan, masukkan kod akses, dan mula memasukkan produk anda.</div></details>
-      <details class="faq"><summary>Kenapa perlu beli sekarang?</summary><div class="faq-body">Satu keputusan harga yang salah atau satu kempen yang rugi boleh menyebabkan kerugian melebihi harga pakej ini. Lebih cepat anda mula mengira dengan betul, lebih cepat margin anda terlindung. Harga RM39 juga terhad kepada 37 seller terawal.</div></details>
+      <details class="faq"><summary>Kenapa perlu beli sekarang?</summary><div class="faq-body">Satu keputusan harga yang salah atau satu kempen yang rugi boleh menyebabkan kerugian melebihi harga pakej ini. Lebih cepat anda mula mengira dengan betul, lebih cepat margin anda terlindung. Harga RM39 tamat 8 Ogos atau bila 37 slot founder penuh. Dan kerana ada jaminan refund 7 hari, anda boleh cuba dahulu tanpa risiko.</div></details>
     </div>
     <div class="wa-help">
       <div class="wa-ico">💬</div>
@@ -636,7 +656,7 @@ footer p{font-size:12.5px;color:var(--dim);line-height:1.7}
       <h2 style="margin-top:16px">Tahu untung sebenar sebelum harga anda<br>makan diri sendiri.</h2>
       <p>Dapatkan E-book dan akses penuh DYNOPRO untuk mengaudit produk Shopee dan TikTok Shop anda hari ini.</p>
       <button class="btn-primary checkout-trigger">Dapatkan E-book + Akses Penuh — RM39</button>
-      <div class="microcopy" style="margin-top:14px">Harga pengenalan untuk 37 seller terawal. Selepas itu RM49.</div>
+      <div class="microcopy" style="margin-top:14px">🛡️ Jaminan wang dikembalikan 7 hari · Harga RM39 tamat 8 Ogos atau bila 37 slot penuh.</div>
     </div>
   </div>
 </section>
@@ -743,7 +763,7 @@ const CONFIG = {
   // Nombor WhatsApp untuk soalan (format antarabangsa tanpa +).
   whatsapp: '60182889932',
   // Tarikh tamat promo (waktu Malaysia).
-  promoEnd: '2026-08-31T23:59:59+08:00',
+  promoEnd: '2026-08-08T23:59:59+08:00',
   // Baki slot founder — kemas kini ikut jualan sebenar.
   // Jumlah slot founder, dan berapa yang MASIH ADA.
   // Kemas kini slotsLeft ikut jualan sebenar — meter di halaman ikut nombor ini.
