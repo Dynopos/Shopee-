@@ -658,7 +658,7 @@ footer p{font-size:12.5px;color:var(--dim);line-height:1.7}
 
       <div class="step" id="stepGateway">
         <h3 style="font-size:16px;margin-bottom:5px">Pilih bank anda</h3>
-        <p style="font-size:13px;margin-bottom:4px">FPX Online Banking — paparan simulasi aliran pembayaran.</p>
+        <p style="font-size:13px;margin-bottom:4px">Bayarcash · FPX Online Banking — paparan simulasi aliran pembayaran.</p>
         <div class="banks">
           <button class="bank" type="button">Maybank2u</button>
           <button class="bank" type="button">CIMB Clicks</button>
@@ -674,13 +674,13 @@ footer p{font-size:12.5px;color:var(--dim);line-height:1.7}
       <div class="step" id="stepSuccess" style="text-align:center">
         <div class="success-ico">✓</div>
         <h3 style="font-size:19px;margin-bottom:7px">Bayaran diterima</h3>
-        <p style="font-size:14px">Dalam versi sebenar, pelanggan menerima e-mel akses dan terus dibawa ke DYNOPRO.</p>
+        <p style="font-size:14px">Dalam versi sebenar, Bayarcash mengesahkan bayaran dan anda menghantar kod akses kepada pembeli.</p>
         <div class="steps-list">
           <b>Aliran selepas pembayaran sebenar</b>
           <ol>
             <li>E-book dihantar melalui e-mel</li>
             <li>Kod akses DYNOPRO dijana</li>
-            <li>Pelanggan buka dynopro.my dan masukkan kod</li>
+            <li>Pembeli buka dynopro.my dan masukkan kod</li>
           </ol>
         </div>
         <button class="btn-primary" style="width:100%;margin-top:16px" id="finishCheckout">Tutup</button>
@@ -694,8 +694,12 @@ footer p{font-size:12.5px;color:var(--dim);line-height:1.7}
    TETAPAN — ubah bahagian ini sahaja bila anda dah sedia
    ══════════════════════════════════════════════════════════ */
 const CONFIG = {
-  // Tampal pautan pembayaran sebenar (toyyibPay / Bayarcash) di sini.
+  // ── PAUTAN BAYARAN BAYARCASH ──────────────────────────────
+  // Tampal Payment Link dari BCL.my di antara tanda petik.
+  // Contoh: 'https://dynopro.bcl.my/form/dynopro-rm29'
   // Biarkan kosong ('') untuk kekal dalam mod demo.
+  // Bila diisi, butang "Dapatkan" terus ke halaman bayaran Bayarcash
+  // (Bayarcash sendiri kutip nama, e-mel & telefon — jadi borang kita dilangkau).
   paymentUrl: '',
   // Nombor WhatsApp untuk soalan (format antarabangsa tanpa +).
   whatsapp: '60182889932',
@@ -740,9 +744,13 @@ const CONFIG = {
   const form = document.getElementById('checkoutForm');
   const live = !!CONFIG.paymentUrl;
 
+  // Mod LANGSUNG: butang terus ke Bayarcash — borang kita dilangkau
+  // kerana Bayarcash sendiri mengutip nama, e-mel dan telefon pembeli.
   if (live) {
-    document.getElementById('demoTag').style.display = 'none';
-    document.getElementById('payNote').textContent = 'Anda akan dibawa ke halaman pembayaran selamat.';
+    document.querySelectorAll('.checkout-trigger').forEach(b => {
+      b.addEventListener('click', () => { window.location.href = CONFIG.paymentUrl; });
+    });
+    return;
   }
 
   const show = k => { Object.values(steps).forEach(s => s.classList.remove('active')); steps[k].classList.add('active'); };
@@ -758,7 +766,6 @@ const CONFIG = {
   form.addEventListener('submit', e => {
     e.preventDefault();
     if (!form.reportValidity()) return;
-    if (live) { window.location.href = CONFIG.paymentUrl; return; }
     show('g');
   });
 
