@@ -1,4 +1,4 @@
-const CACHE = 'kira-untung-v3';
+const CACHE = 'dynopro-v4';
 const ASSETS = [
   './',
   './index.html',
