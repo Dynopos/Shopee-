@@ -104,6 +104,23 @@ section{padding:clamp(52px,7vw,92px) 0}
 .promo-sub{font-size:13px;color:var(--muted)}
 .slots{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--muted)}
 .slots b{font-size:20px;font-weight:900;color:#F0ABFC}
+
+/* SLOT METER */
+.meter{margin-top:10px;max-width:340px}
+.meter-top{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;margin-bottom:6px}
+.meter-top b{font-size:15px;font-weight:900;color:#F0ABFC}
+.meter-top span{color:var(--dim)}
+.meter-track{height:9px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;border:1px solid var(--line-2)}
+.meter-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#22C55E,#F59E0B 62%,#EF4444);transition:width .8s cubic-bezier(.22,1,.36,1)}
+.meter-note{font-size:11.5px;color:var(--dim);margin-top:6px}
+
+/* AFTER PAYMENT */
+.after{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}
+.after-step{background:var(--card);border:1px solid var(--line);border-radius:var(--r-sm);padding:16px}
+.after-n{width:26px;height:26px;border-radius:50%;background:var(--grad);color:#fff;font-size:12px;font-weight:900;display:grid;place-items:center;margin-bottom:9px}
+.after-step b{display:block;font-size:14px;margin-bottom:3px}
+.after-step span{font-size:12.5px;color:var(--muted);line-height:1.55}
+@media(max-width:760px){.after{grid-template-columns:1fr}}
 .cd{display:flex;gap:9px}
 .cd-unit{background:var(--card);border:1px solid var(--line-2);border-radius:12px;padding:9px 13px;text-align:center;min-width:60px}
 .cd-num{font-size:22px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1.1}
@@ -374,7 +391,11 @@ footer p{font-size:12.5px;color:var(--dim);line-height:1.7}
     <div class="promo-left">
       <div class="promo-title">🔥 Harga pengenalan seller Shopee &amp; TikTok</div>
       <div class="promo-sub">E-book + akses penuh DYNOPRO pada RM39 — selepas 37 slot penuh, harga kembali RM49.</div>
-      <div class="slots">Slot tinggal <b id="slotsLeft">37</b></div>
+      <div class="meter">
+        <div class="meter-top"><span>Slot founder diambil</span><b><span id="slotsTaken">0</span> / <span id="slotsTotal">37</span></b></div>
+        <div class="meter-track"><div class="meter-fill" id="meterFill" style="width:0%"></div></div>
+        <div class="meter-note" id="slotsNote">Tinggal <b id="slotsLeft">37</b> slot pada harga RM39.</div>
+      </div>
     </div>
     <div class="cd">
       <div class="cd-unit"><div class="cd-num" id="days">00</div><div class="cd-lab">Hari</div></div>
@@ -560,6 +581,24 @@ footer p{font-size:12.5px;color:var(--dim);line-height:1.7}
         </div>
       </div>
     </div>
+
+    <div class="after">
+      <div class="after-step">
+        <div class="after-n">1</div>
+        <b>Bayar melalui Bayarcash</b>
+        <span>FPX online banking, kad kredit atau e-wallet. Selamat dan disahkan serta-merta.</span>
+      </div>
+      <div class="after-step">
+        <div class="after-n">2</div>
+        <b>Terima kod akses</b>
+        <span>Kod dan e-book dihantar terus melalui WhatsApp — biasanya dalam beberapa minit waktu bekerja.</span>
+      </div>
+      <div class="after-step">
+        <div class="after-n">3</div>
+        <b>Terus guna</b>
+        <span>Buka dynopro.my, masukkan kod, dan mula audit produk anda. Tiada pemasangan.</span>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -706,8 +745,27 @@ const CONFIG = {
   // Tarikh tamat promo (waktu Malaysia).
   promoEnd: '2026-08-31T23:59:59+08:00',
   // Baki slot founder — kemas kini ikut jualan sebenar.
+  // Jumlah slot founder, dan berapa yang MASIH ADA.
+  // Kemas kini slotsLeft ikut jualan sebenar — meter di halaman ikut nombor ini.
+  slotsTotal: 37,
   slotsLeft: 37,
 };
+
+/* ── Meter slot founder ── */
+(() => {
+  const total = Math.max(1, CONFIG.slotsTotal || 37);
+  const left = Math.min(total, Math.max(0, CONFIG.slotsLeft ?? total));
+  const taken = total - left;
+  const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  set('slotsTotal', total);
+  set('slotsTaken', taken);
+  set('slotsLeft', left);
+  const fill = document.getElementById('meterFill');
+  // Isi sekurang-kurangnya 4% supaya bar kelihatan walaupun belum ada jualan.
+  if (fill) requestAnimationFrame(() => { fill.style.width = Math.max(4, (taken / total) * 100) + '%'; });
+  const note = document.getElementById('slotsNote');
+  if (note && left === 0) note.innerHTML = 'Semua slot founder telah diambil — harga kini RM49.';
+})();
 
 /* ── Pautan WhatsApp ── */
 (() => {
