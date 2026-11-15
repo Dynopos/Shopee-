@@ -1,0 +1,32 @@
+{
+  "name": "DYNOPRO — Profit Intelligence for TikTok & Shopee Sellers",
+  "short_name": "DYNOPRO",
+  "description": "Profit intelligence untuk penjual TikTok Shop & Shopee Malaysia — kira untung, margin, ROI, audit pukal dan report PDF.",
+  "lang": "ms",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#7818C0",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

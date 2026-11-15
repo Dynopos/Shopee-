@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ProfitCalc — Malaysia Sellers</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #F5F5F7; color: #1A1A2E; min-height: 100vh; font-size: 14px; }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 2px; }
+    .app { display: flex; min-height: 100vh; }
+    .sidebar { width: 220px; min-height: 100vh; background: #C0000A; display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 100; }
+    .sidebar-logo { padding: 20px 18px 16px; border-bottom: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; gap: 10px; }
+    .logo-icon { width: 34px; height: 34px; background: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .logo-icon svg { width: 18px; height: 18px; }
+    .logo-text { font-size: 14px; font-weight: 700; color: white; line-height: 1.2; }
+    .logo-sub { font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 1px; }
+    .sidebar-nav { padding: 12px 10px; flex: 1; overflow-y: auto; }
+    .nav-section-label { font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.4); letter-spacing: 0.1em; text-transform: uppercase; padding: 10px 10px 5px; }
+    .nav-item { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 7px; cursor: pointer; color: rgba(255,255,255,0.7); font-size: 13px; font-weight: 500; transition: all 0.15s; margin-bottom: 1px; border: none; background: none; width: 100%; text-align: left; }
+    .nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
+    .nav-item.active { background: rgba(255,255,255,0.18); color: white; font-weight: 600; }
+    .nav-item-icon { width: 16px; text-align: center; flex-shrink: 0; font-size: 14px; }
+    .sidebar-footer { padding: 14px 16px; border-top: 1px solid rgba(255,255,255,0.12); }
+    .sidebar-footer-text { font-size: 10px; color: rgba(255,255,255,0.45); line-height: 1.7; }
+    .sidebar-footer-text strong { color: rgba(255,255,255,0.7); }
+    .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar { height: 56px; background: white; border-bottom: 1px solid #E5E7EB; display: flex; align-items: center; padding: 0 24px; gap: 14px; position: sticky; top: 0; z-index: 50; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .topbar-search { flex: 1; max-width: 320px; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 7px 12px 7px 32px; font-size: 13px; color: #374151; outline: none; font-family: 'Inter', sans-serif; }
+    .topbar-search:focus { border-color: #C0000A; }
+    .topbar-search-wrap { position: relative; flex: 1; max-width: 320px; }
+    .topbar-search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #9CA3AF; font-size: 12px; }
+    .topbar-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+    .topbar-icon-btn { width: 34px; height: 34px; border-radius: 8px; border: 1px solid #E5E7EB; background: white; color: #6B7280; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; transition: all 0.15s; }
+    .topbar-icon-btn:hover { border-color: #C0000A; color: #C0000A; }
+    .topbar-avatar { width: 34px; height: 34px; border-radius: 8px; background: linear-gradient(135deg, #C0000A, #FF4444); display: flex; align-items: center; justify-content: center; color: white; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .page-header { padding: 20px 24px 0; }
+    .page-title { font-size: 22px; font-weight: 800; color: #111827; margin-bottom: 3px; }
+    .page-sub { font-size: 13px; color: #6B7280; margin-bottom: 4px; }
+    .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #9CA3AF; padding: 12px 24px 0; }
+    .breadcrumb-sep { color: #D1D5DB; }
+    .breadcrumb-current { color: #C0000A; font-weight: 600; }
+    .breadcrumb a { color: #6B7280; text-decoration: none; cursor: pointer; }
+    .content { padding: 20px 24px 32px; }
+    .card { background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .card-title { font-size: 14px; font-weight: 700; color: #111827; display: flex; align-items: center; gap: 8px; }
+    .card-title-icon { width: 28px; height: 28px; background: #FEF2F2; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #C0000A; flex-shrink: 0; }
+    .card-sub { font-size: 12px; color: #9CA3AF; margin-top: 2px; font-weight: 400; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+    .stat-card { background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: box-shadow 0.15s; }
+    .stat-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .stat-label { font-size: 11px; color: #9CA3AF; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .stat-value { font-size: 24px; font-weight: 800; color: #111827; font-family: 'JetBrains Mono', monospace; }
+    .stat-value.red { color: #C0000A; } .stat-value.green { color: #059669; }
+    .stat-sub { font-size: 11px; color: #9CA3AF; margin-top: 5px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-size: 12px; font-weight: 600; color: #374151; }
+    .form-input, .form-select { background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; color: #111827; font-size: 13px; font-family: 'Inter', sans-serif; padding: 9px 12px; outline: none; transition: all 0.15s; width: 100%; }
+    .form-input:focus, .form-select:focus { border-color: #C0000A; background: white; box-shadow: 0 0 0 3px rgba(192,0,10,0.08); }
+    .form-input::placeholder { color: #9CA3AF; }
+    .form-input.mono { font-family: 'JetBrains Mono', monospace; }
+    .cost-row { display: grid; grid-template-columns: 1fr 40px 120px 32px; gap: 8px; align-items: center; padding: 7px 0; border-bottom: 1px solid #F3F4F6; }
+    .cost-row:last-child { border-bottom: none; }
+    .cost-prefix { font-size: 12px; color: #9CA3AF; font-weight: 600; text-align: center; }
+    .btn-del { width: 30px; height: 30px; border-radius: 6px; border: 1px solid #E5E7EB; background: white; color: #9CA3AF; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 300; transition: all 0.15s; }
+    .btn-del:hover { border-color: #EF4444; color: #EF4444; background: #FEF2F2; }
+    .total-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; margin-top: 12px; }
+    .total-bar-label { font-size: 13px; font-weight: 600; color: #374151; }
+    .total-bar-value { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 700; color: #C0000A; }
+    .platform-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .platform-card { border: 2px solid #E5E7EB; border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.15s; background: #F9FAFB; }
+    .platform-card:hover { border-color: #D1D5DB; background: white; }
+    .platform-card.selected { border-color: #C0000A; background: #FEF2F2; }
+    .platform-name { font-size: 14px; font-weight: 700; color: #111827; margin: 8px 0 3px; }
+    .platform-fee { font-size: 11px; color: #6B7280; }
+    .toggle-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #F9FAFB; border-radius: 8px; border: 1px solid #E5E7EB; margin-bottom: 6px; transition: all 0.15s; }
+    .toggle-row.active { border-color: #FECACA; background: #FEF2F2; }
+    .toggle-label { font-size: 13px; color: #374151; font-weight: 500; flex: 1; }
+    .toggle { width: 36px; height: 20px; background: #D1D5DB; border-radius: 10px; position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0; border: none; }
+    .toggle.on { background: #C0000A; }
+    .toggle::after { content: ''; position: absolute; width: 14px; height: 14px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .toggle.on::after { transform: translateX(16px); }
+    .mkt-inputs { display: flex; gap: 6px; align-items: center; }
+    .type-seg { display: flex; background: white; border-radius: 6px; border: 1px solid #E5E7EB; overflow: hidden; }
+    .type-seg button { padding: 5px 9px; font-size: 11px; font-weight: 600; color: #6B7280; background: none; border: none; cursor: pointer; transition: all 0.15s; font-family: 'Inter', sans-serif; }
+    .type-seg button.active { background: #C0000A; color: white; }
+    .target-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .target-btn { padding: 11px; border-radius: 8px; border: 2px solid #E5E7EB; background: #F9FAFB; color: #6B7280; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: 'Inter', sans-serif; text-align: center; }
+    .target-btn.active { border-color: #C0000A; background: #FEF2F2; color: #C0000A; }
+    .price-pills { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+    .price-pill { border-radius: 10px; padding: 14px; text-align: center; }
+    .price-pill.breakeven { background: #FEF2F2; border: 1px solid #FECACA; }
+    .price-pill.recommended { background: #FEF2F2; border: 2px solid #C0000A; }
+    .price-pill.premium { background: #F0FDF4; border: 1px solid #A7F3D0; }
+    .price-pill-label { font-size: 10px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.06em; }
+    .price-pill-value { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 800; margin-top: 3px; }
+    .price-pill.breakeven .price-pill-value { color: #EF4444; }
+    .price-pill.recommended .price-pill-value { color: #C0000A; }
+    .price-pill.premium .price-pill-value { color: #059669; }
+    .result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .result-item { background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px; padding: 14px; transition: all 0.15s; }
+    .result-item:hover { border-color: #FECACA; background: #FEF2F2; }
+    .result-label { font-size: 11px; color: #6B7280; font-weight: 600; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.03em; }
+    .result-value { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 800; color: #111827; }
+    .result-value.green { color: #059669; } .result-value.red { color: #EF4444; } .result-value.primary { color: #C0000A; } .result-value.orange { color: #D97706; }
+    .fee-breakdown { background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px; }
+    .fee-breakdown-title { font-size: 11px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+    .fee-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+    .fee-key { font-size: 12px; color: #6B7280; } .fee-val { font-size: 12px; font-family: 'JetBrains Mono', monospace; color: #374151; font-weight: 600; }
+    .fee-total-row { display: flex; justify-content: space-between; padding-top: 8px; margin-top: 6px; border-top: 1px solid #E5E7EB; }
+    .fee-total-key { font-size: 13px; font-weight: 700; color: #111827; } .fee-total-val { font-size: 14px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: #C0000A; }
+    .sim-current { text-align: center; margin-bottom: 20px; padding: 20px; background: #FEF2F2; border-radius: 10px; border: 1px solid #FECACA; }
+    .sim-price { font-family: 'JetBrains Mono', monospace; font-size: 40px; font-weight: 800; color: #C0000A; }
+    .sim-label { font-size: 12px; color: #6B7280; margin-top: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .price-slider { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px; outline: none; cursor: pointer; }
+    .price-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: white; border: 3px solid #C0000A; box-shadow: 0 2px 6px rgba(192,0,10,0.3); cursor: pointer; }
+    .slider-labels { display: flex; justify-content: space-between; margin-top: 8px; }
+    .slider-label { font-size: 11px; color: #9CA3AF; font-family: 'JetBrains Mono', monospace; }
+    .btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; border: none; font-family: 'Inter', sans-serif; }
+    .btn-primary { background: #C0000A; color: white; box-shadow: 0 2px 8px rgba(192,0,10,0.25); }
+    .btn-primary:hover { background: #A30008; box-shadow: 0 4px 14px rgba(192,0,10,0.35); transform: translateY(-1px); }
+    .btn-outline { background: white; color: #374151; border: 1px solid #E5E7EB; }
+    .btn-outline:hover { border-color: #C0000A; color: #C0000A; background: #FEF2F2; }
+    .btn-success { background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; }
+    .btn-danger { background: #FEF2F2; color: #EF4444; border: 1px solid #FECACA; }
+    .btn-sm { padding: 6px 13px; font-size: 12px; }
+    .ai-box { background: linear-gradient(135deg, #FEF2F2, #FFF7F7); border: 1px solid #FECACA; border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+    .ai-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .ai-dot { width: 7px; height: 7px; background: #C0000A; border-radius: 50%; animation: pulse 2s infinite; }
+    .ai-badge { font-size: 11px; font-weight: 800; color: #C0000A; letter-spacing: 0.08em; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.75); } }
+    .ai-summary { font-size: 14px; color: #111827; font-weight: 600; margin-bottom: 10px; }
+    .ai-tips { display: flex; flex-direction: column; gap: 6px; }
+    .ai-tip { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: #374151; padding: 7px 10px; background: white; border-radius: 7px; border: 1px solid #FECACA; border-left: 3px solid #C0000A; }
+    .scenario-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .scenario-card { background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px; padding: 16px; transition: all 0.15s; }
+    .scenario-card:hover { border-color: #FECACA; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .scenario-label { font-size: 10px; color: #C0000A; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+    .scenario-name { font-size: 13px; color: #111827; font-weight: 700; margin-bottom: 10px; }
+    .scenario-divider { border: none; border-top: 1px solid #E5E7EB; margin: 8px 0; }
+    .scenario-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; }
+    .scenario-key { font-size: 11px; color: #6B7280; }
+    .scenario-val { font-size: 12px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+    .scenario-val.green { color: #059669; } .scenario-val.red { color: #EF4444; } .scenario-val.primary { color: #C0000A; }
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { font-size: 11px; font-weight: 700; color: #6B7280; text-align: left; padding: 10px 14px; background: #F9FAFB; border-bottom: 1px solid #E5E7EB; text-transform: uppercase; letter-spacing: 0.04em; }
+    .data-table td { font-size: 13px; color: #374151; padding: 12px 14px; border-bottom: 1px solid #F3F4F6; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: #FEF2F2; }
+    .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
+    .badge-shopee { background: #FFF0EE; color: #EE4D2D; } .badge-tiktok { background: #F3F4F6; color: #111827; }
+    .badge-verified { background: #ECFDF5; color: #059669; } .badge-warning { background: #FFFBEB; color: #D97706; }
+    .search-wrap { position: relative; }
+    .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #9CA3AF; font-size: 12px; }
+    .search-input { background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; color: #111827; font-size: 13px; font-family: 'Inter', sans-serif; padding: 8px 12px 8px 32px; outline: none; width: 220px; transition: all 0.15s; }
+    .search-input:focus { border-color: #C0000A; background: white; }
+    .monitor-item { display: flex; gap: 12px; align-items: flex-start; padding: 14px; background: #F9FAFB; border-radius: 8px; border: 1px solid #E5E7EB; margin-bottom: 8px; }
+    .monitor-dot { width: 9px; height: 9px; border-radius: 50%; margin-top: 3px; flex-shrink: 0; }
+    .monitor-dot.ok { background: #059669; } .monitor-dot.change { background: #D97706; animation: pulse 2s infinite; }
+    .monitor-source { font-size: 13px; color: #111827; font-weight: 600; }
+    .monitor-detail { font-size: 11px; color: #9CA3AF; margin-top: 2px; }
+    .confidence-bar { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+    .confidence-track { height: 5px; background: #E5E7EB; border-radius: 3px; flex: 1; overflow: hidden; }
+    .confidence-fill { height: 100%; border-radius: 3px; background: linear-gradient(to right, #C0000A, #EF4444); }
+    .confidence-label { font-size: 10px; color: #6B7280; font-family: 'JetBrains Mono', monospace; width: 32px; text-align: right; font-weight: 600; }
+    .admin-input { background: white; border: 1px solid #E5E7EB; border-radius: 6px; color: #111827; font-size: 12px; font-family: 'JetBrains Mono', monospace; padding: 5px 8px; outline: none; width: 72px; text-align: right; }
+    .admin-input:focus { border-color: #C0000A; }
+    .alert-bar { display: flex; align-items: center; gap: 10px; padding: 11px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; }
+    .alert-bar.warning { background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; }
+    .quick-card { background: white; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .quick-card:hover { border-color: #C0000A; box-shadow: 0 4px 16px rgba(192,0,10,0.1); transform: translateY(-2px); }
+    .quick-card-icon { font-size: 32px; margin-bottom: 12px; }
+    .quick-card-title { font-size: 14px; font-weight: 700; color: #111827; margin-bottom: 5px; }
+    .quick-card-sub { font-size: 12px; color: #6B7280; line-height: 1.5; }
+    .empty { text-align: center; padding: 48px 24px; }
+    .empty-icon { font-size: 48px; margin-bottom: 14px; }
+    .empty-title { font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 6px; }
+    .empty-sub { font-size: 13px; color: #6B7280; }
+    .spinner { width: 14px; height: 14px; border: 2px solid #FECACA; border-top-color: #C0000A; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .tabs { display: flex; gap: 2px; background: #F3F4F6; border-radius: 9px; padding: 3px; margin-bottom: 16px; }
+    .tab { flex: 1; padding: 7px 14px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; color: #6B7280; background: none; border: none; transition: all 0.15s; font-family: 'Inter', sans-serif; }
+    .tab.active { background: white; color: #C0000A; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+    hr { border: none; border-top: 1px solid #F3F4F6; margin: 14px 0; }
+    @media (max-width: 900px) {
+      .sidebar { width: 58px; }
+      .logo-text, .logo-sub, .nav-label, .nav-section-label, .sidebar-footer-text { display: none; }
+      .main { margin-left: 58px; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .result-grid { grid-template-columns: 1fr 1fr; }
+      .form-grid, .form-grid-3 { grid-template-columns: 1fr; }
+      .price-pills { grid-template-columns: 1fr; }
+      .scenario-grid { grid-template-columns: 1fr; }
+      .platform-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+const { useState, useCallback, useMemo } = React;
+
+const FEE_DB = {
+  shopee: {
+    name: "Shopee Malaysia",
+    categories: {
+      "Fashion":          { commission: 3.5, transaction: 2.0, platform: 0, payment: 1.5, source: "https://seller.shopee.com.my", verified: true },
+      "Electronics":      { commission: 3.0, transaction: 2.0, platform: 0, payment: 1.5, source: "https://seller.shopee.com.my", verified: true },
+      "Health & Beauty":  { commission: 4.0, transaction: 2.0, platform: 0, payment: 1.5, source: "https://seller.shopee.com.my", verified: true },
+      "Home & Living":    { commission: 3.5, transaction: 2.0, platform: 0, payment: 1.5, source: "https://seller.shopee.com.my", verified: true },
+      "Food & Beverages": { commission: 5.0, transaction: 2.0, platform: 0, payment: 1.5, source: "https://seller.shopee.com.my", verified: true },
+    }
+  },
+  tiktok: {
+    name: "TikTok Shop Malaysia",
+    categories: {
+      "Fashion":          { commission: 2.5, transaction: 1.8, platform: 0, payment: 1.0, source: "https://seller-my.tiktok.com", verified: true },
+      "Electronics":      { commission: 2.0, transaction: 1.8, platform: 0, payment: 1.0, source: "https://seller-my.tiktok.com", verified: true },
+      "Health & Beauty":  { commission: 3.0, transaction: 1.8, platform: 0, payment: 1.0, source: "https://seller-my.tiktok.com", verified: true },
+      "Home & Living":    { commission: 2.5, transaction: 1.8, platform: 0, payment: 1.0, source: "https://seller-my.tiktok.com", verified: true },
+      "Food & Beverages": { commission: 4.0, transaction: 1.8, platform: 0, payment: 1.0, source: "https://seller-my.tiktok.com", verified: true },
+    }
+  }
+};
+
+const CATS = Object.keys(FEE_DB.shopee.categories);
+const rm = v => `RM${(parseFloat(v)||0).toFixed(2)}`;
+const pct = v => `${(parseFloat(v)||0).toFixed(1)}%`;
+
+const calcFees = (price, rule) => {
+  const c = price*(rule.commission/100), t = price*(rule.transaction/100),
+        pl = price*(rule.platform/100), pay = price*(rule.payment/100);
+  return { commission:c, transaction:t, platform:pl, payment:pay, total:c+t+pl+pay };
+};
+
+const calcMkt = (price, mkt) => {
+  let total = 0; const bd = {};
+  Object.entries(mkt).forEach(([k,item]) => {
+    if (!item.enabled) { bd[k]=0; return; }
+    const v = item.type==="percent" ? price*(item.value/100) : item.value;
+    bd[k]=v; total+=v;
+  });
+  return { total, bd };
+};
+
+const calc = (price, cost, rule, mkt) => {
+  const mpFees = calcFees(price, rule);
+  const mktCost = calcMkt(price, mkt);
+  const totalCost = cost + mpFees.total + mktCost.total;
+  const netProfit = price - totalCost;
+  const margin = price>0 ? (netProfit/price)*100 : 0;
+  const roi = cost>0 ? (netProfit/cost)*100 : 0;
+  return { netProfit, margin, roi, sellerPayout: price-mpFees.total, totalCost, mpFees, mktCost,
+           breakEven: totalCost, recommended: totalCost*1.20, premium: totalCost*1.35 };
+};
+
+const DEFAULT_COSTS = [
+  {id:1,label:"Kos Produk",amount:""},{id:2,label:"Pembungkusan",amount:""},{id:3,label:"Bubble Wrap",amount:""},
+  {id:4,label:"Kotak",amount:""},{id:5,label:"Stiker",amount:""},{id:6,label:"Buruh",amount:""},
+  {id:7,label:"Yuran Pengurusan",amount:""},{id:8,label:"Bahan Penghantaran",amount:""},{id:9,label:"Hadiah Percuma",amount:""},{id:10,label:"Lain-lain",amount:""},
+];
+
+const DEFAULT_MKT = {
+  affiliate:   {enabled:false,label:"Affiliate",value:10,type:"percent"},
+  gmvMax:      {enabled:false,label:"GMV Max",value:5,type:"percent"},
+  ads:         {enabled:false,label:"Ads Marketplace",value:0,type:"fixed"},
+  voucher:     {enabled:false,label:"Voucher",value:5,type:"percent"},
+  coins:       {enabled:false,label:"Coins Cashback",value:1,type:"percent"},
+  freeShipping:{enabled:false,label:"Free Shipping",value:0,type:"fixed"},
+  campaign:    {enabled:false,label:"Campaign",value:0,type:"fixed"},
+};
+
+const MOCK_SAVED = [
+  {id:1,name:"Skincare Set Premium",sku:"SKN-001",platform:"shopee",category:"Health & Beauty",margin:23.4,profit:8.20,price:35.90},
+  {id:2,name:"Tudung Bawal Cotton",sku:"FAS-042",platform:"tiktok",category:"Fashion",margin:31.2,profit:12.50,price:40.00},
+  {id:3,name:"Air Fryer Mini 2L",sku:"ELC-019",platform:"shopee",category:"Electronics",margin:18.7,profit:28.00,price:149.90},
+];
+
+const RATING_COLOR = {Excellent:"#059669",Good:"#059669",Fair:"#D97706",Poor:"#EF4444",Loss:"#EF4444"};
+
+function App() {
+  const [view, setView] = useState("dashboard");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiAdvice, setAiAdvice] = useState(null);
+  const [info, setInfo] = useState({name:"",sku:"",brand:"",category:"Health & Beauty",sub:""});
+  const [platform, setPlatform] = useState("shopee");
+  const [costs, setCosts] = useState(DEFAULT_COSTS.map(c=>({...c})));
+  const [mkt, setMkt] = useState({...DEFAULT_MKT});
+  const [price, setPrice] = useState(35.90);
+  const [profitTarget, setProfitTarget] = useState({type:"percent",value:20});
+  const [saved, setSaved] = useState(MOCK_SAVED);
+  const [search, setSearch] = useState("");
+  const [feeDb, setFeeDb] = useState(FEE_DB);
+  const [adminTab, setAdminTab] = useState("shopee");
+
+  const feeRule = useMemo(()=> feeDb[platform]?.categories?.[info.category] || {commission:3.5,transaction:2.0,platform:0,payment:1.5}, [platform,info.category,feeDb]);
+  const totalCost = useMemo(()=> costs.reduce((s,c)=>s+(parseFloat(c.amount)||0),0), [costs]);
+  const res = useMemo(()=> calc(price,totalCost,feeRule,mkt), [price,totalCost,feeRule,mkt]);
+  const minS = useMemo(()=>Math.max(totalCost*0.8,1),[totalCost]);
+  const maxS = useMemo(()=>Math.max(totalCost*3,price*2,100),[totalCost,price]);
+  const sliderPct = useMemo(()=>Math.min(100,Math.max(0,((price-minS)/(maxS-minS))*100)),[price,minS,maxS]);
+
+  const scenarios = useMemo(()=>[
+    {label:"A",name:"Tetapan Semasa",mkt},
+    {label:"B",name:"Affiliate OFF",mkt:{...mkt,affiliate:{...mkt.affiliate,enabled:false}}},
+    {label:"C",name:"Voucher 10%",mkt:{...mkt,voucher:{...mkt.voucher,enabled:true,value:10}}},
+    {label:"D",name:"GMV Max OFF",mkt:{...mkt,gmvMax:{...mkt.gmvMax,enabled:false}}},
+  ].map(s=>({...s,res:calc(price,totalCost,feeRule,s.mkt)})),[price,totalCost,feeRule,mkt]);
+
+  const addCost = () => setCosts(p=>[...p,{id:Date.now(),label:"Item Kos",amount:""}]);
+  const delCost = id => setCosts(p=>p.filter(c=>c.id!==id));
+  const updCost = (id,f,v) => setCosts(p=>p.map(c=>c.id===id?{...c,[f]:v}:c));
+  const togMkt = k => setMkt(p=>({...p,[k]:{...p[k],enabled:!p[k].enabled}}));
+  const updMkt = (k,f,v) => setMkt(p=>({...p,[k]:{...p[k],[f]:v}}));
+
+  const saveProduct = () => {
+    if(!info.name) return;
+    setSaved(p=>[{id:Date.now(),name:info.name,sku:info.sku||"-",platform,category:info.category,margin:res.margin,profit:res.netProfit,price},...p]);
+    setView("saved");
+  };
+
+  const resetAll = () => {
+    setCosts(DEFAULT_COSTS.map(c=>({...c}))); setMkt({...DEFAULT_MKT});
+    setInfo({name:"",sku:"",brand:"",category:"Health & Beauty",sub:""}); setPrice(35.90); setAiAdvice(null);
+  };
+
+  const fetchAI = useCallback(async () => {
+    setAiLoading(true); setAiAdvice(null);
+    // Simulate AI response for standalone (no API key in HTML)
+    await new Promise(r=>setTimeout(r,1500));
+    const margin = res.margin;
+    let rating = margin>25?"Excellent":margin>15?"Good":margin>5?"Fair":margin>0?"Poor":"Loss";
+    let tips = [];
+    if(margin<15) tips.push("Margin di bawah 15% — pertimbangkan naikkan harga atau kurangkan kos pembungkusan.");
+    if(mkt.affiliate.enabled && mkt.affiliate.value>10) tips.push("Komisen affiliate "+mkt.affiliate.value+"% agak tinggi — cuba kurangkan ke 8-10%.");
+    if(res.mpFees.total > price*0.1) tips.push("Fee marketplace melebihi 10% harga jual — semak kategori yang lebih rendah fee.");
+    if(tips.length===0) tips.push("Margin "+pct(margin)+" — dalam julat yang baik untuk marketplace Malaysia.");
+    tips.push("Bandingkan dengan pesaing di platform yang sama sebelum tetapkan harga akhir.");
+    if(tips.length<3) tips.push("Aktifkan GMV Max semasa kempen untuk tingkatkan visibility tanpa kos tetap.");
+    setAiAdvice({
+      summary: margin>15 ? `Produk ini mempunyai margin ${pct(margin)} — keuntungan yang sihat untuk ${platform==="shopee"?"Shopee":"TikTok Shop"} MY.` : `Margin ${pct(margin)} agak rendah — ada ruang penambahbaikan sebelum listing.`,
+      rating,
+      tips: tips.slice(0,3),
+      recommendedPrice: res.recommended,
+      warning: margin<=0 ? "RUGI — harga jual lebih rendah daripada jumlah kos. Naikkan harga segera." : null
+    });
+    setAiLoading(false);
+  },[res,mkt,platform]);
+
+  const filtered = saved.filter(p=>p.name.toLowerCase().includes(search.toLowerCase())||p.sku.toLowerCase().includes(search.toLowerCase()));
+
+  const PAGE = {dashboard:"Overview",calculator:"Kalkulator Untung",saved:"Produk Tersimpan",monitor:"Pemantau Fee",admin:"Enjin Fee"};
+  const SUB = {dashboard:"Ringkasan untung marketplace anda",calculator:"Kira untung bersih sebenar sebelum listing",saved:"Urus semua pengiraan produk anda",monitor:"Pantau perubahan fee marketplace rasmi",admin:"Urus kadar fee — tanpa sentuh kod"};
+
+  const NAV = [
+    {section:"UTAMA",items:[{key:"dashboard",icon:"◈",label:"Overview"}]},
+    {section:"APPS",items:[{key:"calculator",icon:"🧮",label:"Kalkulator"},{key:"saved",icon:"📦",label:"Produk Tersimpan"},{key:"monitor",icon:"📡",label:"Pemantau Fee"}]},
+    {section:"ADMIN",items:[{key:"admin",icon:"⚙",label:"Enjin Fee"}]},
+    {section:"AKAN DATANG",items:[{key:null,icon:"🤖",label:"AI Generator",disabled:true},{key:null,icon:"📊",label:"Analytics",disabled:true}]},
+  ];
+
+  return (
+    <div className="app">
+      {/* SIDEBAR */}
+      <aside className="sidebar">
+        <div className="sidebar-logo">
+          <div className="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C0000A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </div>
+          <div>
+            <div className="logo-text">ProfitCalc</div>
+            <div className="logo-sub">Malaysia Sellers</div>
+          </div>
+        </div>
+        <nav className="sidebar-nav">
+          {NAV.map((sec,si)=>(
+            <div key={si}>
+              <div className="nav-section-label">{sec.section}</div>
+              {sec.items.map((item,ii)=>(
+                <button key={ii} className={`nav-item ${view===item.key?"active":""}`}
+                  onClick={()=>item.key&&setView(item.key)}
+                  style={item.disabled?{opacity:0.4,cursor:"not-allowed"}:{}}
+                >
+                  <span className="nav-item-icon">{item.icon}</span>
+                  <span className="nav-label">{item.label}</span>
+                  {item.disabled&&<span style={{fontSize:9,marginLeft:"auto",background:"rgba(255,255,255,0.15)",padding:"1px 5px",borderRadius:3}}>SOON</span>}
+                </button>
+              ))}
+            </div>
+          ))}
+        </nav>
+        <div className="sidebar-footer">
+          <div className="sidebar-footer-text">
+            <strong>Database: Live</strong><br/>Shopee MY ✓<br/>TikTok Shop MY ✓
+          </div>
+        </div>
+      </aside>
+
+      {/* MAIN */}
+      <div className="main">
+        <div className="topbar">
+          <div className="topbar-search-wrap">
+            <span className="topbar-search-icon">🔍</span>
+            <input className="topbar-search" placeholder="Cari..." />
+          </div>
+          <div className="topbar-right">
+            <button className="topbar-icon-btn">⚙</button>
+            <button className="topbar-icon-btn">🔔</button>
+            <div className="topbar-avatar">P</div>
+          </div>
+        </div>
+
+        <div className="breadcrumb">
+          <a onClick={()=>setView("dashboard")}>Dashboard</a>
+          {view!=="dashboard"&&<><span className="breadcrumb-sep">›</span><a onClick={()=>setView("dashboard")}>Overview</a></>}
+          <span className="breadcrumb-sep">›</span>
+          <span className="breadcrumb-current">{PAGE[view]}</span>
+        </div>
+
+        <div className="page-header">
+          <div className="page-title">{PAGE[view]}</div>
+          <div className="page-sub">{SUB[view]}</div>
+        </div>
+
+        <div className="content">
+          {view==="dashboard"&&<Dashboard saved={saved} setSaved={setSaved} setView={setView}/>}
+          {view==="calculator"&&<Calculator
+            info={info} setInfo={setInfo} platform={platform} setPlatform={setPlatform}
+            costs={costs} mkt={mkt} price={price} setPrice={setPrice}
+            profitTarget={profitTarget} setProfitTarget={setProfitTarget}
+            feeRule={feeRule} feeDb={feeDb} totalCost={totalCost} res={res}
+            minS={minS} maxS={maxS} sliderPct={sliderPct} scenarios={scenarios}
+            aiLoading={aiLoading} aiAdvice={aiAdvice} fetchAI={fetchAI}
+            addCost={addCost} delCost={delCost} updCost={updCost}
+            togMkt={togMkt} updMkt={updMkt} saveProduct={saveProduct} resetAll={resetAll}
+          />}
+          {view==="saved"&&<Saved saved={filtered} search={search} setSearch={setSearch} setSaved={setSaved} setView={setView}/>}
+          {view==="monitor"&&<Monitor/>}
+          {view==="admin"&&<Admin feeDb={feeDb} setFeeDb={setFeeDb} adminTab={adminTab} setAdminTab={setAdminTab}/>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Dashboard({saved,setView}) {
+  const avg = arr => arr.length ? arr.reduce((s,x)=>s+x,0)/arr.length : 0;
+  return (<>
+    <div className="stats-grid">
+      {[
+        {label:"Jumlah Produk",value:saved.length,sub:"Pengiraan tersimpan"},
+        {label:"Purata Margin",value:pct(avg(saved.map(p=>p.margin))),sub:"Semua produk",cls:"red"},
+        {label:"Purata Untung",value:rm(avg(saved.map(p=>p.profit))),sub:"Bersih setiap produk",cls:"green"},
+        {label:"Disimpan",value:saved.length,sub:"Sepanjang masa"},
+      ].map((s,i)=>(
+        <div key={i} className="stat-card">
+          <div className="stat-label">{s.label}</div>
+          <div className={`stat-value ${s.cls||""}`}>{s.value}</div>
+          <div className="stat-sub">{s.sub}</div>
+        </div>
+      ))}
+    </div>
+    <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14,marginBottom:16}}>
+      {[
+        {icon:"🧮",title:"Pengiraan Baru",sub:"Kira untung sebenar sebelum listing",action:()=>setView("calculator")},
+        {icon:"📡",title:"Pemantau Fee",sub:"Semak kemas kini fee platform terkini",action:()=>setView("monitor")},
+        {icon:"⚙",title:"Panel Admin",sub:"Edit kadar fee tanpa sentuh kod",action:()=>setView("admin")},
+      ].map((q,i)=>(
+        <div key={i} className="quick-card" onClick={q.action}>
+          <div className="quick-card-icon">{q.icon}</div>
+          <div className="quick-card-title">{q.title}</div>
+          <div className="quick-card-sub">{q.sub}</div>
+        </div>
+      ))}
+    </div>
+    <div className="card">
+      <div className="card-header">
+        <div><div className="card-title"><span className="card-title-icon">📋</span>Pengiraan Terkini</div><div className="card-sub">Pengiraan untung produk terbaru anda</div></div>
+        <button className="btn btn-primary btn-sm" onClick={()=>setView("calculator")}>+ Pengiraan Baru</button>
+      </div>
+      {saved.length===0
+        ? <div className="empty"><div className="empty-icon">📊</div><div className="empty-title">Tiada pengiraan lagi</div><div className="empty-sub">Buat pengiraan pertama untuk lihat insight untung di sini</div></div>
+        : <table className="data-table">
+            <thead><tr><th>Produk</th><th>Platform</th><th>Kategori</th><th>Harga</th><th>Margin</th><th>Untung Bersih</th></tr></thead>
+            <tbody>{saved.slice(0,5).map(p=>(
+              <tr key={p.id}>
+                <td><div style={{fontWeight:700,color:"#111827"}}>{p.name}</div><div style={{fontSize:11,color:"#9CA3AF"}}>{p.sku}</div></td>
+                <td><span className={`badge badge-${p.platform}`}>{p.platform==="shopee"?"🛍️ Shopee":"🎵 TikTok"}</span></td>
+                <td style={{color:"#6B7280",fontSize:12}}>{p.category}</td>
+                <td><span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700}}>{rm(p.price)}</span></td>
+                <td><span style={{color:p.margin>20?"#059669":p.margin>10?"#D97706":"#EF4444",fontFamily:"'JetBrains Mono',monospace",fontWeight:700}}>{pct(p.margin)}</span></td>
+                <td><span style={{color:p.profit>0?"#059669":"#EF4444",fontFamily:"'JetBrains Mono',monospace",fontWeight:700}}>{rm(p.profit)}</span></td>
+              </tr>
+            ))}</tbody>
+          </table>
+      }
+    </div>
+  </>);
+}
+
+function Calculator({info,setInfo,platform,setPlatform,costs,mkt,price,setPrice,profitTarget,setProfitTarget,feeRule,feeDb,totalCost,res,minS,maxS,sliderPct,scenarios,aiLoading,aiAdvice,fetchAI,addCost,delCost,updCost,togMkt,updMkt,saveProduct,resetAll}) {
+  return (<>
+    {/* Info */}
+    <div className="card">
+      <div className="card-header"><div className="card-title"><span className="card-title-icon">📦</span>Maklumat Asas</div></div>
+      <div className="form-grid" style={{marginBottom:12}}>
+        <div className="form-group"><label className="form-label">Nama Produk *</label><input className="form-input" placeholder="cth. Skincare Set Premium" value={info.name} onChange={e=>setInfo(p=>({...p,name:e.target.value}))}/></div>
+        <div className="form-group"><label className="form-label">SKU</label><input className="form-input" placeholder="cth. SKN-001" value={info.sku} onChange={e=>setInfo(p=>({...p,sku:e.target.value}))}/></div>
+      </div>
+      <div className="form-grid-3">
+        <div className="form-group"><label className="form-label">Brand</label><input className="form-input" placeholder="Brand" value={info.brand} onChange={e=>setInfo(p=>({...p,brand:e.target.value}))}/></div>
+        <div className="form-group"><label className="form-label">Kategori *</label>
+          <select className="form-select" value={info.category} onChange={e=>setInfo(p=>({...p,category:e.target.value}))}>
+            {CATS.map(c=><option key={c}>{c}</option>)}
+          </select>
+        </div>
+        <div className="form-group"><label className="form-label">Sub Kategori</label><input className="form-input" placeholder="cth. Pelembab" value={info.sub} onChange={e=>setInfo(p=>({...p,sub:e.target.value}))}/></div>
+      </div>
+    </div>
+
+    {/* Platform */}
+    <div className="card">
+      <div className="card-header"><div className="card-title"><span className="card-title-icon">🛒</span>Marketplace</div></div>
+      <div className="platform-grid">
+        {[
+          {key:"shopee",icon:"🛍️",name:"Shopee Malaysia",fee:`Komisyen ${feeDb.shopee.categories[info.category]?.commission||3.5}%`},
+          {key:"tiktok",icon:"🎵",name:"TikTok Shop Malaysia",fee:`Komisyen ${feeDb.tiktok.categories[info.category]?.commission||2.5}%`},
+        ].map(p=>(
+          <div key={p.key} className={`platform-card ${platform===p.key?"selected":""}`} onClick={()=>setPlatform(p.key)}>
+            <div style={{fontSize:28}}>{p.icon}</div>
+            <div className="platform-name">{p.name}</div>
+            <div className="platform-fee">{p.fee} · Dari database</div>
+          </div>
+        ))}
+      </div>
+      <div style={{marginTop:14,display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+        <div className="fee-breakdown">
+          <div className="fee-breakdown-title">Kadar Fee — {info.category}</div>
+          <div className="fee-row"><span className="fee-key">Komisyen</span><span className="fee-val">{feeRule.commission}%</span></div>
+          <div className="fee-row"><span className="fee-key">Transaksi</span><span className="fee-val">{feeRule.transaction}%</span></div>
+          <div className="fee-row"><span className="fee-key">Platform</span><span className="fee-val">{feeRule.platform}%</span></div>
+          <div className="fee-row"><span className="fee-key">Pembayaran</span><span className="fee-val">{feeRule.payment}%</span></div>
+          <div className="fee-total-row"><span className="fee-total-key">Jumlah Fee</span><span className="fee-total-val">{(feeRule.commission+feeRule.transaction+feeRule.platform+feeRule.payment).toFixed(1)}%</span></div>
+        </div>
+        <div style={{background:"#F9FAFB",border:"1px solid #E5E7EB",borderRadius:8,padding:14,display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",textAlign:"center"}}>
+          <div style={{fontSize:11,color:"#6B7280",fontWeight:700,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:6}}>Pada Harga {rm(price)}</div>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:28,fontWeight:800,color:"#C0000A"}}>{rm(res.mpFees.total)}</div>
+          <div style={{fontSize:11,color:"#6B7280",marginTop:3}}>Jumlah fee marketplace</div>
+        </div>
+      </div>
+    </div>
+
+    {/* Kos */}
+    <div className="card">
+      <div className="card-header"><div className="card-title"><span className="card-title-icon">💰</span>Kos Produk</div><button className="btn btn-outline btn-sm" onClick={addCost}>+ Tambah Kos</button></div>
+      {costs.map(c=>(
+        <div key={c.id} className="cost-row">
+          <input className="form-input" style={{fontSize:13}} value={c.label} onChange={e=>updCost(c.id,"label",e.target.value)}/>
+          <span className="cost-prefix">RM</span>
+          <input className="form-input mono" placeholder="0.00" value={c.amount} onChange={e=>updCost(c.id,"amount",e.target.value)} type="number" min="0" step="0.01"/>
+          <button className="btn-del" onClick={()=>delCost(c.id)}>×</button>
+        </div>
+      ))}
+      <div className="total-bar"><span className="total-bar-label">Jumlah Kos Produk</span><span className="total-bar-value">{rm(totalCost)}</span></div>
+    </div>
+
+    {/* Marketing */}
+    <div className="card">
+      <div className="card-header"><div className="card-title"><span className="card-title-icon">📣</span>Kos Pemasaran</div></div>
+      {Object.entries(mkt).map(([k,item])=>(
+        <div key={k} className={`toggle-row ${item.enabled?"active":""}`}>
+          <button className={`toggle ${item.enabled?"on":""}`} onClick={()=>togMkt(k)}/>
+          <span className="toggle-label">{item.label}</span>
+          {item.enabled&&(
+            <div className="mkt-inputs">
+              <div className="type-seg">
+                <button className={item.type==="percent"?"active":""} onClick={()=>updMkt(k,"type","percent")}>%</button>
+                <button className={item.type==="fixed"?"active":""} onClick={()=>updMkt(k,"type","fixed")}>RM</button>
+              </div>
+              <input className="form-input mono" style={{width:80}} type="number" min="0" step="0.1" value={item.value} onChange={e=>updMkt(k,"value",parseFloat(e.target.value)||0)}/>
+              <span style={{fontSize:11,color:"#6B7280",width:64,textAlign:"right",fontFamily:"'JetBrains Mono',monospace",fontWeight:600}}>
+                {item.type==="percent"?rm(price*item.value/100):"fixed"}
+              </span>
+            </div>
+          )}
+        </div>
+      ))}
+      {res.mktCost.total>0&&<div className="total-bar" style={{marginTop:10,background:"#FFFBEB",border:"1px solid #FDE68A"}}><span className="total-bar-label">Jumlah Kos Pemasaran</span><span className="total-bar-value" style={{color:"#D97706"}}>{rm(res.mktCost.total)}</span></div>}
+    </div>
+
+    {/* Harga */}
+    <div className="card">
+      <div className="card-header"><div className="card-title"><span className="card-title-icon">🏷️</span>Harga Jual</div></div>
+      <div className="form-group" style={{marginBottom:14}}>
+        <label className="form-label">Masukkan Harga Jual (RM)</label>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:18,fontWeight:700,color:"#9CA3AF"}}>RM</span>
+          <input className="form-input mono" style={{fontSize:24,fontWeight:800,padding:"10px 14px"}} type="number" min="0" step="0.10" value={price} onChange={e=>setPrice(parseFloat(e.target.value)||0)}/>
+        </div>
+      </div>
+      <div className="price-pills">
+        <div className="price-pill breakeven"><div className="price-pill-label">Titik Pulang Modal</div><div className="price-pill-value">{rm(res.breakEven)}</div></div>
+        <div className="price-pill recommended"><div className="price-pill-label">⭐ Disyorkan</div><div className="price-pill-value">{rm(res.recommended)}</div></div>
+        <div className="price-pill premium"><div className="price-pill-label">Premium</div><div className="price-pill-value">{rm(res.premium)}</div></div>
+      </div>
+    </div>
+
+    {/* Keputusan */}
+    <div className="card">
+      <div className="card-header">
+        <div><div className="card-title"><span className="card-title-icon">📊</span>Keputusan Pengiraan</div><div className="card-sub">Analisis untung berkuasa AI</div></div>
+        <button className="btn btn-primary btn-sm" onClick={fetchAI} disabled={aiLoading}>
+          {aiLoading?<><span className="spinner"></span> Menganalisis...</>:"✨ Penasihat AI"}
+        </button>
+      </div>
+      <div className="result-grid" style={{marginBottom:14}}>
+        {[
+          {label:"Untung Bersih",value:rm(res.netProfit),cls:res.netProfit>=0?"green":"red"},
+          {label:"Margin Untung",value:pct(res.margin),cls:res.margin>=15?"green":res.margin>=5?"orange":"red"},
+          {label:"ROI",value:pct(res.roi),cls:res.roi>=20?"green":res.roi>=0?"orange":"red"},
+          {label:"Bayaran Penjual",value:rm(res.sellerPayout),cls:"primary"},
+          {label:"Fee Marketplace",value:rm(res.mpFees.total),cls:"red"},
+          {label:"Jumlah Kos",value:rm(res.totalCost),cls:""},
+        ].map((r,i)=>(
+          <div key={i} className="result-item"><div className="result-label">{r.label}</div><div className={`result-value ${r.cls}`}>{r.value}</div></div>
+        ))}
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+        <div className="fee-breakdown">
+          <div className="fee-breakdown-title">Perincian Fee Marketplace</div>
+          <div className="fee-row"><span className="fee-key">Komisyen ({feeRule.commission}%)</span><span className="fee-val">{rm(res.mpFees.commission)}</span></div>
+          <div className="fee-row"><span className="fee-key">Transaksi ({feeRule.transaction}%)</span><span className="fee-val">{rm(res.mpFees.transaction)}</span></div>
+          <div className="fee-row"><span className="fee-key">Pembayaran ({feeRule.payment}%)</span><span className="fee-val">{rm(res.mpFees.payment)}</span></div>
+          <div className="fee-total-row"><span className="fee-total-key">Jumlah Fee</span><span className="fee-total-val">{rm(res.mpFees.total)}</span></div>
+        </div>
+        <div className="fee-breakdown">
+          <div className="fee-breakdown-title">Pecahan Kos Penuh</div>
+          <div className="fee-row"><span className="fee-key">Kos Produk</span><span className="fee-val">{rm(totalCost)}</span></div>
+          <div className="fee-row"><span className="fee-key">Fee Marketplace</span><span className="fee-val">{rm(res.mpFees.total)}</span></div>
+          <div className="fee-row"><span className="fee-key">Pemasaran</span><span className="fee-val">{rm(res.mktCost.total)}</span></div>
+          <div className="fee-total-row"><span className="fee-total-key">Jumlah Kos</span><span className="fee-total-val">{rm(res.totalCost)}</span></div>
+        </div>
+      </div>
+    </div>
+
+    {/* AI Advice */}
+    {aiAdvice&&(
+      <div className="ai-box">
+        <div className="ai-header">
+          <div className="ai-dot"/><span className="ai-badge">PENASIHAT AI</span>
+          <span style={{fontSize:12,fontWeight:800,color:RATING_COLOR[aiAdvice.rating]||"#D97706",marginLeft:"auto",padding:"2px 10px",background:"white",borderRadius:20,border:"1px solid #E5E7EB"}}>{aiAdvice.rating}</span>
+        </div>
+        <div className="ai-summary">{aiAdvice.summary}</div>
+        {aiAdvice.warning&&<div style={{padding:"8px 12px",background:"#FFFBEB",border:"1px solid #FDE68A",borderRadius:7,fontSize:12,color:"#92400E",marginBottom:10}}>⚠️ {aiAdvice.warning}</div>}
+        <div className="ai-tips">{aiAdvice.tips?.map((t,i)=><div key={i} className="ai-tip"><span>→</span><span>{t}</span></div>)}</div>
+        {aiAdvice.recommendedPrice>0&&(
+          <div style={{marginTop:12,display:"flex",alignItems:"center",gap:10,paddingTop:12,borderTop:"1px solid #FECACA"}}>
+            <span style={{fontSize:12,color:"#6B7280",fontWeight:600}}>Harga Disyorkan AI:</span>
+            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:18,fontWeight:800,color:"#C0000A"}}>{rm(aiAdvice.recommendedPrice)}</span>
+            <button className="btn btn-primary btn-sm" onClick={()=>setPrice(aiAdvice.recommendedPrice)}>Guna</button>
+          </div>
+        )}
+      </div>
+    )}
+
+    {/* Simulator */}
+    <div className="card">
+      <div className="card-header"><div className="card-title"><span className="card-title-icon">🎚️</span>Simulator Harga</div></div>
+      <div className="sim-current"><div className="sim-price">{rm(price)}</div><div className="sim-label">Harga Jual Simulasi</div></div>
+      <input type="range" className="price-slider"
+        style={{background:`linear-gradient(to right, #C0000A ${sliderPct}%, #E5E7EB ${sliderPct}%)`}}
+        min={minS} max={maxS} step={0.10} value={price} onChange={e=>setPrice(parseFloat(e.target.value))}/>
+      <div className="slider-labels"><span className="slider-label">{rm(minS)}</span><span className="slider-label">{rm(maxS)}</span></div>
+      <div className="result-grid" style={{marginTop:16}}>
+        {[
+          {label:"Untung Bersih",value:rm(res.netProfit),cls:res.netProfit>=0?"green":"red"},
+          {label:"Margin",value:pct(res.margin),cls:res.margin>=15?"green":"orange"},
+          {label:"ROI",value:pct(res.roi),cls:res.roi>=20?"green":"orange"},
+          {label:"Fee MP",value:rm(res.mpFees.total),cls:"red"},
+          {label:"Bayaran Penjual",value:rm(res.sellerPayout),cls:"primary"},
+          {label:"Jumlah Kos",value:rm(res.totalCost),cls:""},
+        ].map((r,i)=><div key={i} className="result-item"><div className="result-label">{r.label}</div><div className={`result-value ${r.cls}`}>{r.value}</div></div>)}
+      </div>
+    </div>
+
+    {/* Senario */}
+    <div className="card">
+      <div className="card-header"><div className="card-title"><span className="card-title-icon">⚡</span>Perbandingan Senario</div></div>
+      <div className="scenario-grid">
+        {scenarios.map((s,i)=>(
+          <div key={i} className="scenario-card">
+            <div className="scenario-label">Senario {s.label}</div>
+            <div className="scenario-name">{s.name}</div>
+            <hr className="scenario-divider"/>
+            <div className="scenario-row"><span className="scenario-key">Untung Bersih</span><span className={`scenario-val ${s.res.netProfit>=0?"green":"red"}`}>{rm(s.res.netProfit)}</span></div>
+            <div className="scenario-row"><span className="scenario-key">Margin</span><span className="scenario-val" style={{color:s.res.margin>=15?"#059669":"#D97706"}}>{pct(s.res.margin)}</span></div>
+            <div className="scenario-row"><span className="scenario-key">ROI</span><span className="scenario-val" style={{color:s.res.roi>=20?"#059669":"#D97706"}}>{pct(s.res.roi)}</span></div>
+            <div className="scenario-row"><span className="scenario-key">Fee MP</span><span className="scenario-val red">{rm(s.res.mpFees.total)}</span></div>
+            <div className="scenario-row"><span className="scenario-key">Pemasaran</span><span className="scenario-val red">{rm(s.res.mktCost.total)}</span></div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div style={{display:"flex",gap:10,marginBottom:24}}>
+      <button className="btn btn-primary" onClick={saveProduct}>💾 Simpan Produk</button>
+      <button className="btn btn-outline" onClick={resetAll}>🔄 Reset</button>
+    </div>
+  </>);
+}
+
+function Saved({saved,search,setSearch,setSaved,setView}) {
+  return (
+    <div className="card">
+      <div className="card-header">
+        <div className="card-title"><span className="card-title-icon">📦</span>Produk Tersimpan</div>
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          <div className="search-wrap"><span className="search-icon">🔍</span><input className="search-input" placeholder="Cari produk..." value={search} onChange={e=>setSearch(e.target.value)}/></div>
+          <button className="btn btn-primary btn-sm" onClick={()=>setView("calculator")}>+ Baru</button>
+        </div>
+      </div>
+      {saved.length===0
+        ?<div className="empty"><div className="empty-icon">📦</div><div className="empty-title">Tiada produk ditemui</div><div className="empty-sub">Cuba carian lain atau buat produk baru</div></div>
+        :<table className="data-table">
+          <thead><tr><th>Produk</th><th>Platform</th><th>Kategori</th><th>Harga</th><th>Margin</th><th>Untung</th><th>Tindakan</th></tr></thead>
+          <tbody>{saved.map(p=>(
+            <tr key={p.id}>
+              <td><div style={{fontWeight:700,color:"#111827"}}>{p.name}</div><div style={{fontSize:11,color:"#9CA3AF"}}>{p.sku}</div></td>
+              <td><span className={`badge badge-${p.platform}`}>{p.platform==="shopee"?"🛍️ Shopee":"🎵 TikTok"}</span></td>
+              <td style={{color:"#6B7280",fontSize:12}}>{p.category}</td>
+              <td><span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700}}>{rm(p.price)}</span></td>
+              <td><span style={{color:p.margin>20?"#059669":p.margin>10?"#D97706":"#EF4444",fontFamily:"'JetBrains Mono',monospace",fontWeight:700}}>{pct(p.margin)}</span></td>
+              <td><span style={{color:p.profit>0?"#059669":"#EF4444",fontFamily:"'JetBrains Mono',monospace",fontWeight:700}}>{rm(p.profit)}</span></td>
+              <td><button className="btn btn-danger btn-sm" onClick={()=>setSaved(s=>s.filter(x=>x.id!==p.id))}>Padam</button></td>
+            </tr>
+          ))}</tbody>
+        </table>
+      }
+    </div>
+  );
+}
+
+function Monitor() {
+  return (<>
+    <div className="alert-bar warning">⚠️ Pemantauan fee mengimbas sumber rasmi sahaja. Kelulusan admin diperlukan sebelum kemas kini database.</div>
+    <div className="card">
+      <div className="card-header"><div className="card-title"><span className="card-title-icon">📡</span>Sumber Pemantauan</div><button className="btn btn-primary btn-sm">🔄 Imbas Sekarang</button></div>
+      {[
+        {status:"ok",source:"Shopee Seller Education Hub",url:"seller.shopee.com.my/edu",lastCheck:"2 jam lalu",confidence:98},
+        {status:"ok",source:"Shopee Official Announcement",url:"seller.shopee.com.my",lastCheck:"2 jam lalu",confidence:97},
+        {status:"change",source:"TikTok Shop Academy MY",url:"seller-my.tiktok.com/academy",lastCheck:"45 min lalu",confidence:91,change:"Struktur komisyen affiliate baru dikesan"},
+        {status:"ok",source:"TikTok Seller Centre MY",url:"seller-my.tiktok.com",lastCheck:"1 jam lalu",confidence:95},
+      ].map((m,i)=>(
+        <div key={i} className="monitor-item">
+          <div className={`monitor-dot ${m.status}`}/>
+          <div style={{flex:1}}>
+            <div className="monitor-source">{m.source}</div>
+            <div className="monitor-detail">{m.url} · Disemak {m.lastCheck}</div>
+            {m.change&&<div style={{fontSize:12,color:"#D97706",marginTop:4,fontWeight:600}}>⚡ {m.change}</div>}
+            <div className="confidence-bar">
+              <span style={{fontSize:10,color:"#9CA3AF",fontWeight:600}}>Keyakinan</span>
+              <div className="confidence-track"><div className="confidence-fill" style={{width:`${m.confidence}%`}}/></div>
+              <span className="confidence-label">{m.confidence}%</span>
+            </div>
+          </div>
+          <span className={`badge ${m.status==="ok"?"badge-verified":"badge-warning"}`}>{m.status==="ok"?"✓ Terkini":"⚡ Perubahan"}</span>
+        </div>
+      ))}
+    </div>
+  </>);
+}
+
+function Admin({feeDb,setFeeDb,adminTab,setAdminTab}) {
+  return (<>
+    <div className="card">
+      <div className="card-header"><div className="card-title"><span className="card-title-icon">⚙</span>Enjin Fee — Database Langsung</div><button className="btn btn-primary btn-sm">💾 Simpan Semua</button></div>
+      <div className="tabs">
+        <button className={`tab ${adminTab==="shopee"?"active":""}`} onClick={()=>setAdminTab("shopee")}>🛍️ Shopee Malaysia</button>
+        <button className={`tab ${adminTab==="tiktok"?"active":""}`} onClick={()=>setAdminTab("tiktok")}>🎵 TikTok Shop Malaysia</button>
+      </div>
+      <table className="data-table">
+        <thead><tr><th>Kategori</th><th>Komisyen %</th><th>Transaksi %</th><th>Platform %</th><th>Pembayaran %</th><th>Jumlah</th><th>Status</th></tr></thead>
+        <tbody>
+          {Object.entries(feeDb[adminTab].categories).map(([cat,rule])=>(
+            <tr key={cat}>
+              <td style={{fontWeight:700,color:"#111827"}}>{cat}</td>
+              {["commission","transaction","platform","payment"].map(f=>(
+                <td key={f}><input className="admin-input" type="number" min="0" step="0.1" value={rule[f]}
+                  onChange={e=>setFeeDb(p=>({...p,[adminTab]:{...p[adminTab],categories:{...p[adminTab].categories,[cat]:{...rule,[f]:parseFloat(e.target.value)||0}}}}))}
+                /></td>
+              ))}
+              <td><span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:800,color:"#C0000A"}}>{(rule.commission+rule.transaction+rule.platform+rule.payment).toFixed(1)}%</span></td>
+              <td><span className="badge badge-verified">{rule.verified?"✓ Disahkan":"Dalam Semakan"}</span></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </>);
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

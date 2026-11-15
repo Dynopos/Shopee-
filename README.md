@@ -2,6 +2,20 @@
 
 AI-powered product listing generator for Shopee sellers. Upload a product photo, let GPT-4o write the listing, review it, then publish directly to your Shopee shop via the Open Platform API.
 
+## Kandungan Repo
+
+Repo ini mengandungi beberapa bahagian:
+
+| Bahagian | Lokasi | Nota |
+|---|---|---|
+| DYNOPRO — Profit Intelligence (PWA) | `index.html`, `manifest.json`, `sw.js`, `icons/` | Kalkulator untung + akses berkod, dihoskan di GitHub Pages (`dynopro.my`) |
+| Halaman jualan DYNOPRO | `jual.html` | Checkout Bayarcash (RM39), jaminan wang dikembalikan 7 hari |
+| Kalkulator untung (versi `docs/`) | `docs/index.html` | ProfitCalc — Malaysia Sellers, untuk GitHub Pages dari folder `/docs` |
+| Kalkulator untung standalone | `profit-calculator.html` | Fail tunggal, tiada pemasangan |
+| Shopee AI Listing — Next.js | `app/**/*.tsx`, `lib/`, `components/`, `supabase/` | Diterangkan dalam bahagian di bawah |
+| Shopee AI Listing — Laravel | `app/Http`, `app/Services`, `resources/views`, `routes/`, `database/` | `composer install`, salin `.env.example` ke `.env`, `php artisan migrate` |
+| Klien Python Shopee Open API | `shopee/`, `tests/` | `pip install -r requirements-dev.txt && pytest` |
+
 ## Features
 
 - Email/password auth via Supabase
@@ -91,7 +105,7 @@ In the Supabase dashboard → Authentication → URL Configuration:
 1. Register at [open.shopee.com](https://open.shopee.com)
 2. Create an app and note your **Partner ID** and **Partner Key**
 3. Set the redirect URL to: `http://localhost:3000/api/shopee/callback`
-4. For sandbox testing, use `https://partner.test-stable.shopeemobile.com`
+4. For sandbox testing, use `https://partner.test-stable.shopeemobile.com` — change `SHOPEE_BASE_URL` in `lib/shopee/client.ts`
 
 ### 6. Run
 
@@ -100,3 +114,64 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+## Project Structure
+
+```
+.
+├── app/
+│   ├── api/
+│   │   ├── ai/generate/        # POST: upload image, call GPT-4o, save draft
+│   │   ├── auth/callback/      # Supabase OAuth callback
+│   │   ├── products/upload/    # POST: upload image to Shopee, create listing
+│   │   └── shopee/
+│   │       ├── auth/            # GET: redirect to Shopee OAuth
+│   │       ├── callback/        # GET: exchange code for token
+│   │       └── refresh/         # POST: refresh access token
+│   ├── connect-shopee/
+│   ├── dashboard/
+│   ├── login/
+│   ├── preview/
+│   ├── settings/
+│   ├── upload/
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/
+│   └── layout/Navbar.tsx
+├── lib/
+│   ├── openai/generate.ts      # GPT-4o vision listing generator
+│   ├── shopee/client.ts        # Shopee API: auth, upload, create product
+│   └── supabase/
+│       ├── client.ts            # Browser client
+│       ├── server.ts            # Server component client
+│       └── service.ts           # Service role client (API routes)
+├── supabase/migrations/
+│   └── 001_initial_schema.sql
+├── types/index.ts
+├── middleware.ts
+└── .env.example
+```
+
+## Shopee API Notes
+
+All Shopee integration lives in `lib/shopee/client.ts`. Each function has a comment pointing to the exact API docs page.
+
+**Before going live you must:**
+
+1. **Category mapping** — Replace the `PLACEHOLDER_CATEGORY_ID` in `app/api/products/upload/route.ts` with a real leaf category ID from `v2.product.get_category`.
+2. **Logistics** — Replace `logistic_id: 1` in `lib/shopee/client.ts` with real channel IDs from `v2.logistics.get_channel_list`.
+3. **Shop name** — After OAuth, call `v2.shop.get_shop_info` to get the real shop name and update the record.
+4. **Sandbox** — Use `https://partner.test-stable.shopeemobile.com` for testing.
+
+## Environment Variable Reference
+
+```
+NEXT_PUBLIC_SUPABASE_URL        # Supabase project URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY   # Supabase anon/public key
+SUPABASE_SERVICE_ROLE_KEY       # Supabase service role key (server only)
+OPENAI_API_KEY                  # OpenAI API key
+SHOPEE_PARTNER_ID               # Shopee Open Platform partner ID
+SHOPEE_PARTNER_KEY              # Shopee Open Platform partner key
+SHOPEE_REDIRECT_URL             # OAuth callback URL
+NEXT_PUBLIC_APP_URL             # App base URL (for internal API calls)
+```

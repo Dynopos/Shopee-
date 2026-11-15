@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->json('keywords')->nullable();
             $table->json('highlights')->nullable();
             $table->string('image_url')->nullable();
-            $table->string('status')->default('draft');
+            $table->string('status')->default('draft'); // draft|uploading|live|failed
             $table->string('shopee_item_id')->nullable();
             $table->timestamps();
         });
